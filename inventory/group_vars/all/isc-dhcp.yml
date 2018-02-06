@@ -1,0 +1,34 @@
+---
+isc_dhcp_authoritative: true
+
+isc_dhcp_config_dhcp: true
+
+isc_dhcp_listen_interfaces:
+  # - enp0s8
+  - "{{ rpi_wired_int }}"
+  # - eth1
+
+isc_dhcp_name_servers:
+  - 8.8.8.8
+  - 8.8.4.4
+
+isc_dhcp_scopes:
+  - subnet: "{{ dhcp_scope_subnet }}.0"
+    default_lease_time: "{{ isc_dhcp_default_lease_time }}"
+    max_lease_time: "{{ isc_dhcp_max_lease_time }}"
+    netmask: 255.255.255.0
+    # Define scope specific options to configure
+    options:
+      - name: routers
+        value: "{{ dhcp_scope_subnet }}.1"
+      - name: subnet-mask
+        value: 255.255.255.0
+      - name: broadcast-address
+        value: "{{ dhcp_scope_subnet }}.255"
+      - name: domain-name-servers
+        value: "{{ isc_dhcp_name_servers|join (', ') }}"
+    range_start: "{{ dhcp_scope_subnet }}.128"
+    range_end: "{{ dhcp_scope_subnet }}.140"
+
+# Defines primary domain name for environment
+isc_dhcp_pri_domain_name: "{{ pri_domain_name }}"

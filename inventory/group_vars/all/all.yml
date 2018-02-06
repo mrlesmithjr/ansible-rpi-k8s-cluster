@@ -1,0 +1,12 @@
+---
+# Defines dhcp scope subnet for isolated network
+dhcp_scope_subnet: 192.168.100
+
+# Defines jumphost IP address to use as bastion host to reach isolated hosts
+jumphost_ip: 172.16.24.186
+
+# Defines primary dns domain name for isolated network
+pri_domain_name: etsbv.internal
+
+# Defines rpi wired interface name
+rpi_wired_int: eth0

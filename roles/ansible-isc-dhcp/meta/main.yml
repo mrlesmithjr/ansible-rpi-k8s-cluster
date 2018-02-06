@@ -1,0 +1,25 @@
+---
+galaxy_info:
+  author: Larry Smith Jr.
+  description: An Ansible role to install/configure isc-dhcp server(s) https://www.isc.org/downloads/dhcp/ (Configurable options...failover and load balancing ready)
+
+  license: MIT
+  min_ansible_version: 1.2
+
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  - name: Ubuntu
+    versions:
+    - precise
+    - trusty
+    - xenial
+  - name: Debian
+    versions:
+    - jessie
+
+  categories:
+  - networking
+  - system
+dependencies: []

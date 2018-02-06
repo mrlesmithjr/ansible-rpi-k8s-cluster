@@ -1,0 +1,13 @@
+---
+# handlers file for ansible-isc-dhcp
+- name: restart debian DHCP Server
+  service:
+    name: isc-dhcp-server
+    state: restarted
+  become: true
+
+- name: restart redhat DHCP Server
+  service:
+    name: dhcpd
+    state: restarted
+  become: true
