@@ -65,3 +65,14 @@
         src: templates/40-route.j2
         dest: /lib/dhcpcd/dhcpcd-hooks/40-route
       become: true
+
+- hosts: rpi_k8s
+  tasks:
+    - name: Installing Weave Script
+      get_url:
+        url: https://git.io/weave
+        dest: /usr/local/bin/weave
+        mode: a+x
+      become: true
+      tags:
+        - weave
