@@ -15,7 +15,7 @@
     - name: Ensuring netfilter-persistent Is Enabled and Starts On Reboot
       service:
         name: netfilter-persistent
-        state: enabled
+        enabled: true
       become: true
 
     - name: Setting Up IP Forwarding On Primary
@@ -46,14 +46,16 @@
       register: _restarting_host
       when: _dhcpcd_config['changed']
 
-    - name: Wait 300 seconds for port 22 to become open and contain "OpenSSH"
-      wait_for:
-        port: 22
-        host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
-        search_regex: OpenSSH
-        delay: 10
-      connection: local
-      when: _restarting_host['changed']
+    - name: Waiting For Host To Respond
+      wait_for_connection:
+    # - name: Wait 300 seconds for port 22 to become open and contain "OpenSSH"
+    #   wait_for:
+    #     port: 22
+    #     host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+    #     search_regex: OpenSSH
+    #     delay: 10
+    #   connection: local
+    #   when: _restarting_host['changed']
 
     - name: Configuring IPTables
       iptables:
@@ -81,14 +83,25 @@
     - role: ansible-change-hostname
     - role: ansible-isc-dhcp
 
-- hosts: rpi_k8s_master
+  post_tasks:
+    - name: Ensuring isc-dhcp-server Is Started And Enabled On Boot
+      service:
+        name: isc-dhcp-server
+        state: started
+        enabled: true
+      become: true
+
+- hosts: rpi_k8s_slaves
   tasks:
-    - command: ping -c 2 {{ hostvars[inventory_hostname]['ansible_host'] }}
-      register: _ping
-      until: _ping['rc'] == 0
-      retries: 30
-      delay: 2
-      with_items: "{{ groups['rpi_k8s_slaves'] }}"
+    - name: Waiting For Slaves To Respond
+      wait_for_connection:
+
+    # - command: ping -c 2 {{ hostvars[inventory_hostname]['ansible_host'] }}
+    #   register: _ping
+    #   until: _ping['rc'] == 0
+    #   retries: 30
+    #   delay: 2
+    #   with_items: "{{ groups['rpi_k8s_slaves'] }}"
 
 - hosts: rpi_k8s_slaves
   pre_tasks:
@@ -107,6 +120,19 @@
 
 - hosts: rpi_k8s
   tasks:
+    - name: Installing vim
+      apt:
+        name: vim
+        state: present
+      become: true
+      
+    - name: Disabling Swap
+      service:
+        name: dphys-swapfile
+        enabled: false
+        state: stopped
+      become: true
+
     - name: Configuring cmdline Boot
       template:
         src: templates/cmdline.txt.j2
@@ -125,13 +151,17 @@
             _cmdline_boot['changed'] and
             inventory_hostname in groups['rpi_k8s_slaves']
 
-    - command: ping -c 2 {{ hostvars[inventory_hostname]['ansible_host'] }}
-      register: _ping
-      until: _ping['rc'] == 0
-      retries: 30
-      delay: 2
-      with_items: "{{ groups['rpi_k8s_slaves'] }}"
+    - name: Waiting For Host To Respond
+      wait_for_connection:
       when: _reboot_slaves['changed']
+
+    # - command: ping -c 2 {{ hostvars[inventory_hostname]['ansible_host'] }}
+    #   register: _ping
+    #   until: _ping['rc'] == 0
+    #   retries: 30
+    #   delay: 2
+    #   with_items: "{{ groups['rpi_k8s_slaves'] }}"
+    #   when: _reboot_slaves['changed']
 
     - name: Restarting Host
       shell: sleep 2 && shutdown -r now "rebooting to complete hostname change"
@@ -144,11 +174,15 @@
             _cmdline_boot['changed'] and
             inventory_hostname in groups['rpi_k8s_master']
 
-    - name: Wait 300 seconds for port 22 to become open and contain "OpenSSH"
-      wait_for:
-        port: 22
-        host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
-        search_regex: OpenSSH
-        delay: 10
-      connection: local
+    - name: Waiting For Host To Respond
+      wait_for_connection:
       when: _reboot_master['changed']
+
+    # - name: Wait 300 seconds for port 22 to become open and contain "OpenSSH"
+    #   wait_for:
+    #     port: 22
+    #     host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+    #     search_regex: OpenSSH
+    #     delay: 10
+    #   connection: local
+    #   when: _reboot_master['changed']
