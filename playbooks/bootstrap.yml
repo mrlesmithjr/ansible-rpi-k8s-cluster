@@ -74,7 +74,7 @@
 
     - name: Adding Local User SSH Key
       authorized_key:
-        user: pi
+        user: "{{ rpi_username }}"
         state: present
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
       become: true
@@ -95,6 +95,13 @@
   tasks:
     - name: Waiting For Slaves To Respond
       wait_for_connection:
+
+    - name: Adding Local User SSH Key
+      authorized_key:
+        user: "{{ rpi_username }}"
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+      become: true
 
     # - command: ping -c 2 {{ hostvars[inventory_hostname]['ansible_host'] }}
     #   register: _ping
@@ -125,7 +132,7 @@
         name: vim
         state: present
       become: true
-      
+
     - name: Disabling Swap
       service:
         name: dphys-swapfile

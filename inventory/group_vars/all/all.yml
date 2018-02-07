@@ -26,5 +26,14 @@ pri_domain_name: etsbv.internal
 # Defines if GlusterFS should be used for persistent storage capabilities
 rpi_k8s_use_glusterfs: true
 
+# Defines the default rpi password for the rpi_username...default is raspberry
+rpi_password: raspberry
+
+# Defines the root volume device of the RPI's. This is used to update cmdline.txt
+rpi_root_device: /dev/mmcblk0p2
+
+# Defines the default rpi username...default is pi
+rpi_username: pi
+
 # Defines rpi wired interface name
 rpi_wired_int: eth0
