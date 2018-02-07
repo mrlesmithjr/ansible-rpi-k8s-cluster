@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  author: Larry Smith Jr.
+  description: Installs GlusterFS http://www.gluster.org/ (configures and creates cluster)
+
+  license: MIT
+
+  min_ansible_version: 1.2
+
+  platforms:
+  - name: Debian
+    versions:
+      - stretch
+  - name: Ubuntu
+    versions:
+      - trusty
+      - xenial
+
+  categories:
+  - clustering
+  - system
+
+dependencies: []
