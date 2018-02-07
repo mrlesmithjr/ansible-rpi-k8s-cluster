@@ -57,6 +57,7 @@
 
 - name: network | Checking For Cluster-IP Route On Hosts
   shell: "route -n | awk '{print $1}' | grep {{ k8s_cluster_ip }}"
+  become: true
   register: _k8s_cluster_ip_route
   failed_when: "(_k8s_cluster_ip_route['rc'] > 1)"
   changed_when: false
