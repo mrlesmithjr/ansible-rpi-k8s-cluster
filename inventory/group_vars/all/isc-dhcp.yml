@@ -16,19 +16,19 @@ isc_dhcp_scopes:
   - subnet: "{{ dhcp_scope_subnet }}.0"
     default_lease_time: "{{ isc_dhcp_default_lease_time }}"
     max_lease_time: "{{ isc_dhcp_max_lease_time }}"
-    netmask: 255.255.255.0
+    netmask: "{{ dhcp_scope_netmask }}"
     # Define scope specific options to configure
     options:
       - name: routers
-        value: "{{ dhcp_scope_subnet }}.1"
+        value: "{{ dhcp_scope_gateway }}"
       - name: subnet-mask
-        value: 255.255.255.0
+        value: "{{ dhcp_scope_netmask }}"
       - name: broadcast-address
         value: "{{ dhcp_scope_subnet }}.255"
       - name: domain-name-servers
         value: "{{ isc_dhcp_name_servers|join (', ') }}"
-    range_start: "{{ dhcp_scope_subnet }}.128"
-    range_end: "{{ dhcp_scope_subnet }}.140"
+    range_start: "{{ dhcp_scope_start_range }}"
+    range_end: "{{ dhcp_scope_end_range }}"
 
 # Defines primary domain name for environment
 isc_dhcp_pri_domain_name: "{{ pri_domain_name }}"

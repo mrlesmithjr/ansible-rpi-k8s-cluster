@@ -1,12 +1,30 @@
 ---
+# Defines DHCP scope end address
+dhcp_scope_end_range: "{{ dhcp_scope_subnet }}.140"
+
+# Defines DHCP scope gateway address
+dhcp_scope_gateway: "{{ dhcp_scope_subnet }}.1"
+
+# Defines DHCP scope subnet mask
+dhcp_scope_netmask: 255.255.255.0
+
+# Defines DHCP scope start address
+dhcp_scope_start_range: "{{ dhcp_scope_subnet }}.128"
+
 # Defines dhcp scope subnet for isolated network
 dhcp_scope_subnet: 192.168.100
 
 # Defines jumphost IP address to use as bastion host to reach isolated hosts
 jumphost_ip: 172.16.24.186
 
+# Defines the K8's GlusterFS cluster name to define for deployments
+k8s_glusterfs_cluster_name: glusterfs-cluster
+
 # Defines primary dns domain name for isolated network
 pri_domain_name: etsbv.internal
+
+# Defines if GlusterFS should be used for persistent storage capabilities
+rpi_k8s_use_glusterfs: true
 
 # Defines rpi wired interface name
 rpi_wired_int: eth0
