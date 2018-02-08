@@ -122,11 +122,11 @@ there are many different ways to install `kubectl` so head over to the official
 The following list is the hardware which I am using currently while developing
 this.
 
--   5 x [Raspberry Pi 3](https://www.amazon.com/gp/product/B01CD5VC92/ref=oh_aui_detailpage_o00_s02?ie=UTF8&psc=1)
--   2 x [6pack - Cat 6 - Flat Ethernet Cables](https://www.amazon.com/gp/product/B01IQWGKQ6/ref=oh_aui_detailpage_o00_s02?ie=UTF8&psc=1)
--   1 x [Anker PowerPort 6 - 60W 6-Port Charging Hub](https://www.amazon.com/gp/product/B00WI2DN4S/ref=oh_aui_detailpage_o00_s01?ie=UTF8&psc=1)
--   5 x [Samsung 32GB 95MB/s MicroSD Evo Memory Card](https://www.amazon.com/gp/product/B06XWN9Q99/ref=oh_aui_detailpage_o00_s01?ie=UTF8&psc=1)
--   1 x [GeauxRobot Raspberry Pi 3 5-Layer Dog Bone Stack Case](https://www.amazon.com/gp/product/B01D90TX1O/ref=oh_aui_detailpage_o00_s00?ie=UTF8&psc=1)
+-   5 x [Raspberry Pi 3](http://amzn.to/2EbDKfq)
+-   2 x [6pack - Cat 6 - Flat Ethernet Cables](http://amzn.to/2nKvywD)
+-   1 x [Anker PowerPort 6 - 60W 6-Port Charging Hub](http://amzn.to/2ERkV2q)
+-   5 x [Samsung 32GB 95MB/s MicroSD Evo Memory Card](http://amzn.to/2skSlno)
+-   1 x [GeauxRobot Raspberry Pi 3 5-Layer Dog Bone Stack Case](http://amzn.to/2Edbqcw)
 -   1 x 8-Port Ethernet Switch
 
 ### Installing OS
