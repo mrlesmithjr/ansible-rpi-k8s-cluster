@@ -25,6 +25,32 @@ k8s_glusterfs_namespaces:
   - default
   - kube-system
 
+# Defines the K8s GlusterFS persistent volumes to create
+# The path needs to be defined based on glusterfs_client_mounts and
+# glusterfs_create_bricks in group_vars/rpi_k8s/glusterfs.yml as they need to be
+# in sync.
+# All persistent volumes will have gluster- appended to the volume name listed
+# below.
+#
+## Current reclaim policies are:
+## Retain – manual reclamation
+## Recycle – basic scrub (rm -rf /thevolume/*)
+## Delete – associated storage asset such as AWS EBS, GCE PD, Azure Disk, or OpenStack Cinder volume is deleted
+#
+## The access modes are:
+## ReadWriteOnce – the volume can be mounted as read-write by a single node
+## ReadOnlyMany – the volume can be mounted read-only by many nodes
+## ReadWriteMany – the volume can be mounted as read-write by many nodes
+k8s_glusterfs_persistent_volumes:
+  - name: volume-1
+    storage_capacity: 4Gi
+    reclaim_policy: Delete
+    access_modes:
+      - ReadWriteOnce
+      - ReadWriteMany
+    path: volume-1
+    read_only: false
+
 # Defines primary dns domain name for isolated network
 pri_domain_name: etsbv.internal
 

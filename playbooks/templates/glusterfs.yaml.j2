@@ -22,3 +22,23 @@ metadata:
 spec:
   ports:
     - port: 1
+{% for _volume in k8s_glusterfs_persistent_volumes %}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gluster-{{ _volume['name'] }}
+spec:
+  capacity:
+    storage: {{ _volume['storage_capacity'] }}
+  persistentVolumeReclaimPolicy: {{ _volume['reclaim_policy'] }}
+  storageClassName: storage
+  accessModes:
+{%   for _accessmode in _volume['access_modes'] %}
+    - {{ _accessmode }}
+{%   endfor %}
+  glusterfs:
+    endpoints: {{ k8s_glusterfs_cluster_name }}
+    path: {{ _volume['path'] }}
+    readOnly: {{ _volume['read_only']|lower }}
+{% endfor %}
