@@ -1,9 +1,11 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
   - [Background](#background)
+    - [Why?](#why)
+    - [How It Works](#how-it-works)
   - [Hardware](#hardware)
   - [Installing OS](#installing-os)
     - [Downloading OS](#downloading-os)
@@ -28,6 +30,8 @@ Ansible.
 
 ## Background
 
+### Why?
+
 I have been looking at putting together a Kubernetes cluster using Raspberry
 Pi's for a while now. And I finally pulled all of it together and started pulling
 together numerous `Ansible` roles which I had already developed over time. I
@@ -35,6 +39,44 @@ wanted this whole project to be provisioned with `Ansible` so I had a repeatable
 process to build everything out. As well as a way to share with others. I am
 still putting all of the pieces together so this will no doubt be a continual
 updated repo for some time.
+
+### How It Works
+
+The following will outline the design of how this current iteration works.
+Basically we have a 5 (or more) node Raspberry Pi cluster. With the first node
+connecting to wireless to act as our gateway into the cluster. The first node is
+by far the most critical. We use the first nodes wireless connection to also do
+all of our provisioning of our cluster. We execute `Ansible` against all of the
+remaining nodes by using the first node as a bastion host via it's wireless IP.
+Once you obtain the IP of the first node's wireless connection you need to
+update `jumphost_ip:` in [inventory/group_vars/all/all.yml](inventory/group_vars/all/all.yml)
+as well as change the `ansible_host` for `rpi-k8s-1 ansible_host=172.16.24.186`
+in [inventory/hosts.inv](inventory/hosts.inv). If you would like to change the
+subnet which the cluster will use, change `dhcp_scope_subnet:` in [inventory/group_vars/all/all.yml]
+to your desired subnet as well as the `ansible_host` addresses for the following
+nodes in [inventory/hosts.inv](inventory/hosts.inv):
+
+```bash
+[rpi_k8s_slaves]
+rpi-k8s-2 ansible_host=192.168.100.128
+rpi-k8s-3 ansible_host=192.168.100.129
+rpi-k8s-4 ansible_host=192.168.100.130
+rpi-k8s-5 ansible_host=192.168.100.131
+```
+
+> NOTE: We may change to an automated inventory being generated if it makes things
+> a little more easy.
+
+The first node provides the following services for our cluster:
+
+-   DHCP for all of the other nodes (only listening on `eth0`)
+-   Gateway services for other nodes to connect to the internet and such.
+    -   An IPTABLES Masquerade rule NATs traffic from `eth0` through `wlan0`
+
+> NOTE: You can also define a static route on your LAN network firewall (if supported)
+> for the subnet (`192.168.100.0/24` in my case) to the wireless IP address that
+> your first node obtains. This will allow you to communicate with all of the
+> cluster nodes once they get an IP via DHCP from the first node.
 
 ## Hardware
 
@@ -79,7 +121,7 @@ connect to wireless.
 
 ##### Install OS Image
 
-> Note: Remember I am using a Mac so YMMV!
+> NOTE: Remember I am using a Mac so YMMV!
 
 Open up your terminal and execute the following to determine the device name of
 the SD card:
