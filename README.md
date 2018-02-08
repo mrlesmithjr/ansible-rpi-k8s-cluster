@@ -238,6 +238,26 @@ To provision the full stack you can run the following:
 ansible-playbook -i inventory playbooks/deploy.yml
 ```
 
+## Load Balancing And Exposing Services
+
+We have included `Traefik` as an available load balancer which can be deployed
+to expose cluster services.
+
+### Deploying Traefik
+
+You can deploy `Traefik` by running the following:
+
+```bash
+kubectl deploy -f deployments/traefik.yaml
+```
+
+### Accessing Traefik WebUI
+
+You can access the Traefik WebUI by heading over to <http://wirelessIP:8080/dashboard/#/>
+(replace `wirelessIP` with your actual IP of the wireless address on the first node).
+
+![Traefik](images/2018/02/traefik.png)
+
 ## Persistent Storage
 
 ### GlusterFS
