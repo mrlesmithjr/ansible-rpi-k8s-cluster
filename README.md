@@ -300,8 +300,8 @@ ansible-playbook -i inventory playbooks/bootstrap.yml --tags rpi-manage-wifi
 
 ## Load Balancing And Exposing Services
 
-We have included `Traefik` as an available load balancer which can be deployed
-to expose cluster services.
+We have included [Traefik](traefik.io) as an available load balancer which can
+be deployed to expose cluster services.
 
 ### Deploying Traefik
 
