@@ -248,6 +248,18 @@ at this time. So all managment of `GlusterFS` is done via `Ansible`. Check out
 the `group_vars` in [inventory/group_vars/rpi_k8s/glusterfs.yml](inventory/group_vars/rpi_k8s/glusterfs.yml)
 to define the backend bricks and client mounts.
 
+GlusterFS can also be defined to be available in specific namespaces by defining
+the following in [inventory/group_vars/all/all.yml](inventory/group_vars/all/all.yml):
+
+```yaml
+k8s_glusterfs_namespaces:
+  - default
+  - kube-system
+```
+
+By defining GlusterFS into specific namespaces allows persistent storage to be
+available for consumption within those namespaces.
+
 ### Deploying GlusterFS In Kubernetes
 
 You must first deploy the Kubernetes `Endpoints` and `Service` defined in
