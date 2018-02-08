@@ -20,6 +20,7 @@
   - [Deploying](#deploying)
     - [Ansible Variables](#ansible-variables)
     - [Ansible Playbook](#ansible-playbook)
+    - [Managing WI-FI On First Node](#managing-wi-fi-on-first-node)
   - [Load Balancing And Exposing Services](#load-balancing-and-exposing-services)
     - [Deploying Traefik](#deploying-traefik)
     - [Accessing Traefik WebUI](#accessing-traefik-webui)
@@ -270,6 +271,31 @@ To provision the full stack you can run the following:
 
 ```bash
 ansible-playbook -i inventory playbooks/deploy.yml
+```
+
+### Managing WI-FI On First Node
+
+To manage the WI-FI connection on your first node. You can create a `wifi.yml`
+file in `inventory/group_vars/all` with the following defined variables:
+
+> NOTE: `wifi.yml` is added to the `.gitignore` to ensure that the file is excluded
+> from Git. Use your best judgment here. It is probably a better idea to encrypt
+> this file with `ansible-vault`. The task(s) to manage WI-FI are in [playbooks/bootstrap.yml](playbooks/bootstrap.yml) and will only trigger if the
+> variables defined below exist.
+
+```yaml
+k8s_wifi_country: US
+k8s_wifi_password: mysecretwifipassword
+k8s_wifi_ssid: mywifissid
+```
+
+> CAUTION: If your WI-FI IP address changes, `Ansible` will fail as it will no
+> longer be able to connect to the original IP address. Keep this in mind.
+
+If you would like to simply manange the WI-FI connection you may run the following:
+
+```bash
+ansible-playbook -i inventory playbooks/bootstrap.yml --tags rpi-manage-wifi
 ```
 
 ## Load Balancing And Exposing Services

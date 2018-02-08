@@ -79,6 +79,40 @@
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
       become: true
 
+    - name: Managing WI-FI Connection
+      template:
+        src: templates/wpa_supplicant.conf.j2
+        dest: /etc/wpa_supplicant/wpa_supplicant.conf
+        mode: u=rw,g=,o=
+      become: true
+      register: _wifi_configured
+      tags:
+        - rpi-manage-wifi
+      when: >
+            k8s_wifi_country is defined and
+            k8s_wifi_password is defined and
+            k8s_wifi_ssid is defined
+
+    - name: Restarting Networking After WI-FI Configured
+      service:
+        name: networking
+        state: restarted
+        args: wlan0
+      become: true
+      async: 1
+      poll: 0
+      register: _wifi_restarted
+      tags:
+        - rpi-manage-wifi
+      when: _wifi_configured['changed']
+
+    # This will fail if the IP address changes on the host
+    - name: Waiting For WI-FI To Resume
+      wait_for_connection:
+      tags:
+        - rpi-manage-wifi
+      when: _wifi_restarted['changed']
+
   roles:
     - role: ansible-change-hostname
     - role: ansible-isc-dhcp
