@@ -80,6 +80,8 @@ The first node provides the following services for our cluster:
 > your first node obtains. This will allow you to communicate with all of the
 > cluster nodes once they get an IP via DHCP from the first node.
 
+For Kubernetes networking we are using [Weave Net](https://www.weave.works/docs/net/latest/kubernetes/kube-addon/).
+
 ## Hardware
 
 The following list is the hardware which I am using currently while developing
