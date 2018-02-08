@@ -6,13 +6,17 @@
   - [Background](#background)
     - [Why?](#why)
     - [How It Works](#how-it-works)
-  - [Hardware](#hardware)
-  - [Installing OS](#installing-os)
-    - [Downloading OS](#downloading-os)
-    - [Installing OS](#installing-os-1)
-      - [First SD Card](#first-sd-card)
-        - [Install OS Image](#install-os-image)
-      - [Remaining SD cards](#remaining-sd-cards)
+  - [Requirements](#requirements)
+    - [Software](#software)
+      - [Ansible](#ansible)
+      - [Kubernetes CLI Tools](#kubernetes-cli-tools)
+    - [Hardware](#hardware)
+    - [Installing OS](#installing-os)
+      - [Downloading OS](#downloading-os)
+      - [Installing OS](#installing-os-1)
+        - [First SD Card](#first-sd-card)
+          - [Install OS Image](#install-os-image)
+        - [Remaining SD cards](#remaining-sd-cards)
   - [Deploying](#deploying)
     - [Ansible Variables](#ansible-variables)
     - [Ansible Playbook](#ansible-playbook)
@@ -85,7 +89,34 @@ The first node provides the following services for our cluster:
 
 For Kubernetes networking we are using [Weave Net](https://www.weave.works/docs/net/latest/kubernetes/kube-addon/).
 
-## Hardware
+## Requirements
+
+### Software
+
+The following is a list of the required packages to be installed on your `Ansible`
+control machine (the machine you will be executing Ansible from).
+
+#### Ansible
+
+You can install `Ansible` in many different ways so head over to the official
+`Ansible` [intro installation](http://docs.ansible.com/ansible/latest/intro_installation.html).
+
+#### Kubernetes CLI Tools
+
+You will also need to install the `kubectl` package. As with `Ansible`
+there are many different ways to install `kubectl` so head over to the official
+`Kubernetes` [Install and Set Up kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+
+> NOTE: The Ansible playbook [playbooks/deployments.yml](playbooks/deployments.yml)
+> fetches the `admin.conf` from the K8s master and copies this to your local
+> $HOME/.kube/config. This allows us to run `kubectl` commands remotely to the
+> cluster. There is a catch here though. The certificate is signed with the
+> internal IP address of the K8s master. So in order for this to work correctly
+> you will need to setup a static route on your firewall (if supported) to the
+> subnet `192.168.100.0/24`(in our case) via the wireless IP on your first
+> node (also the K8s master).
+
+### Hardware
 
 The following list is the hardware which I am using currently while developing
 this.
@@ -97,17 +128,17 @@ this.
 -   1 x [GeauxRobot Raspberry Pi 3 5-Layer Dog Bone Stack Case](https://www.amazon.com/gp/product/B01D90TX1O/ref=oh_aui_detailpage_o00_s00?ie=UTF8&psc=1)
 -   1 x 8-Port Ethernet Switch
 
-## Installing OS
+### Installing OS
 
 Currently I am using [Raspbian Lite](http://raspbian.org/) for the OS. I did
 not orginally go with Hyperiot intentionally but may give it a go at some point.
 
-### Downloading OS
+#### Downloading OS
 
 Head over [here](https://www.raspberrypi.org/downloads/raspbian/) and download
 the `RASPBIAN STRETCH LITE` image.
 
-### Installing OS
+#### Installing OS
 
 I am using a Mac so my process will based on that so you may need to adjust
 based on your OS.
@@ -120,13 +151,13 @@ adding the `wpa_supplicant.conf` file which will connect us to wireless. We will
 use wireless as our gateway into the cluster. We want to keep this as isolated
 as possible.
 
-#### First SD Card
+##### First SD Card
 
 With our zip file extracted we are now ready to load the image onto our SD card.
 Remember what I mentioned above, the first one is the one which we will use to
 connect to wireless.
 
-##### Install OS Image
+###### Install OS Image
 
 > NOTE: Remember I am using a Mac so YMMV!
 
@@ -219,7 +250,7 @@ diskutil unmountdisk /dev/disk2
 Now set this first one aside or place it into your Raspberry Pi that you want to
 be the first node.
 
-#### Remaining SD cards
+##### Remaining SD cards
 
 For the remaining SD cards you will follow the same process as in [First SD Card](#first-sd-card)
 except you will not create the `wpa_supplicant.conf` file on these. Unless you
