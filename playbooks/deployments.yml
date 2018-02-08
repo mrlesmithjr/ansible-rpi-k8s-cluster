@@ -1,0 +1,12 @@
+---
+- hosts: rpi_k8s
+
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Generating GlusterFS Deployment
+      template:
+        src: templates/glusterfs.yaml.j2
+        dest: ../deployments/glusterfs.yaml
+      when: rpi_k8s_use_glusterfs
