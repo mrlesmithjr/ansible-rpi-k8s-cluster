@@ -1,25 +1,27 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
-  - [Background](#background)
-    - [Why?](#why)
-    - [How It Works](#how-it-works)
-  - [Hardware](#hardware)
-  - [Installing OS](#installing-os)
-    - [Downloading OS](#downloading-os)
-    - [Installing OS](#installing-os-1)
-      - [First SD Card](#first-sd-card)
-        - [Install OS Image](#install-os-image)
-      - [Remaining SD cards](#remaining-sd-cards)
-  - [Deploying](#deploying)
-    - [Ansible Variables](#ansible-variables)
-    - [Ansible Playbook](#ansible-playbook)
-  - [Persistent Storage](#persistent-storage)
-    - [GlusterFS](#glusterfs)
-    - [Deploying GlusterFS In Kubernetes](#deploying-glusterfs-in-kubernetes)
-    - [Using GlusterFS In Kubernetes Pod](#using-glusterfs-in-kubernetes-pod)
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+-   [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
+    -   [Background](#background)
+        -   [Why?](#why)
+        -   [How It Works](#how-it-works)
+    -   [Hardware](#hardware)
+    -   [Installing OS](#installing-os)
+        -   [Downloading OS](#downloading-os)
+        -   [Installing OS](#installing-os-1)
+            -   [First SD Card](#first-sd-card)
+                -   [Install OS Image](#install-os-image)
+            -   [Remaining SD cards](#remaining-sd-cards)
+    -   [Deploying](#deploying)
+        -   [Ansible Variables](#ansible-variables)
+        -   [Ansible Playbook](#ansible-playbook)
+    -   [Persistent Storage](#persistent-storage)
+        -   [GlusterFS](#glusterfs)
+        -   [Deploying GlusterFS In Kubernetes](#deploying-glusterfs-in-kubernetes)
+        -   [Using GlusterFS In Kubernetes Pod](#using-glusterfs-in-kubernetes-pod)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -279,3 +281,15 @@ spec:
       path: volume-1
       readOnly: false
 ```
+
+## License
+
+MIT
+
+## Author Information
+
+Larry Smith Jr.
+
+-   [EverythingShouldBeVirtual](http://everythingshouldbevirtual.com)
+-   [@mrlesmithjr](https://www.twitter.com/mrlesmithjr)
+-   <mailto:mrlesmithjr@gmail.com>
