@@ -20,6 +20,11 @@ jumphost_ip: 172.16.24.186
 # Defines the K8's GlusterFS cluster name to define for deployments
 k8s_glusterfs_cluster_name: glusterfs-cluster
 
+# Define the namespaces for GlusterFS to be defined within
+k8s_glusterfs_namespaces:
+  - default
+  - kube-system
+
 # Defines primary dns domain name for isolated network
 pri_domain_name: etsbv.internal
 
