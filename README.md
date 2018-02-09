@@ -277,7 +277,12 @@ out of scope for this project (for now!).
 
 Most variables that need to be adjusted based on deployment can be found in
 [inventory/group_vars/all/all.yml](inventory/group_vars/all/all.yml). Make sure
-to update `jumphost_ip` to the IP address that your first node obtained via DHCP.
+to update `jumphost_ip` to the IP address that your first node obtained via DHCP
+and `rpi_nodes` to define the number of cluster nodes. If you do not define the
+`rpi_nodes` correctly and you fire up all of your cluster nodes. After the first
+node is provisioned for DHCP we wait for the number of DHCP leases to equal the
+number of cluster nodes (minus the first node). So if this is incorrect,
+provisioning will fail. So keep that in mind.
 
 ### DHCP For Cluster
 
@@ -299,8 +304,9 @@ The important things to ensure that are configured correctly are listed below:
 
 #### [inventory/group_vars/all/all.yml](inventory/group_vars/all/all.yml)
 
-You should change the `dhcp_scope_subnet: 192.168.100`, `dhcp_scope_start_range: "{{ dhcp_scope_subnet }}.128"`, and `dhcp_scope_end_range: "{{ dhcp_scope_subnet }}.131"` variables to
-meet your requirements.
+You should change the `dhcp_scope_subnet: 192.168.100`, `dhcp_scope_start_range: "{{ dhcp_scope_subnet }}.128"`, `dhcp_scope_end_range: "{{ dhcp_scope_subnet }}.131"`, and `rpi_nodes`
+variables to meet your requirements. Please review [ansible-variables](#ansible-variables)
+for further explanation on the importance of `rpi_nodes`.
 
 ```yaml
 # Defines DHCP scope end address
@@ -311,6 +317,10 @@ dhcp_scope_start_range: "{{ dhcp_scope_subnet }}.128"
 
 # Defines dhcp scope subnet for isolated network
 dhcp_scope_subnet: 192.168.100
+
+# Defines the number of nodes in cluster
+# Extremely important to define correctly, otherwise provisioning will fail.
+rpi_nodes: 5
 ```
 
 Based on the above we can ensure that we are only handing out `4` IP addresses

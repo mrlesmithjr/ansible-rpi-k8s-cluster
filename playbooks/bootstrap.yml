@@ -1,4 +1,23 @@
 ---
+# We first calculate if the DHCP scope defined will accomodate the number of cluster nodes
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Capturing The Current DHCP Scope Ending IP
+      set_fact:
+        _current_dhcp_scope_end: "{{ dhcp_scope_end_range.split('.')[3] }}"
+
+# We need to subtract here to account for the starting ip as well as for the
+# first node as it will not need a DHCP address
+    - name: Calculating The Required DHCP Scope Ending IP
+      set_fact:
+        _required_dhcp_scope_end: "{{ (dhcp_scope_start_range.split('.')[3]|int - 1) + (rpi_nodes - 1) }}"
+
+# We fail here if the DHCP ending address is not correct based on the number of nodes.
+    - name: Fail When DHCP Scope Ending Is Not Correct
+      fail: msg="dhcp_scope_end_range should be set to {{ _required_end }}"
+      when: _required_dhcp_scope_end != _current_dhcp_scope_end
+
 - hosts: rpi_k8s_master
   pre_tasks:
     - name: Checking To Make Sure Both DNSMasq and ISC-DHCP Are Not True
@@ -178,6 +197,19 @@
       when: >
             rpi_k8s_use_isc_dhcp and
             not rpi_k8s_use_dnsmasq
+
+- hosts: rpi_k8s_master
+  vars:
+    rpi_update_inventory: false
+  tasks:
+    - name: Capturing DNSMasq DHCP Leases
+      shell: cat /var/lib/misc/dnsmasq.leases | awk '{ print $4,$3,$2 }'
+      register: _dnsmasq_dhcp_leases
+      changed_when: false
+      until: >
+             _dnsmasq_dhcp_leases['stdout_lines'] != [] and
+             _dnsmasq_dhcp_leases['stdout_lines']|length == (rpi_nodes - 1 )
+      when: rpi_k8s_use_dnsmasq
 
 - hosts: rpi_k8s_slaves
   tasks:
