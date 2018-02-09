@@ -59,17 +59,25 @@
 
     - name: Configuring IPTables
       iptables:
-        table: nat
-        chain: POSTROUTING
-        source: "{{ dhcp_scope_subnet }}.0/24"
-        out_interface: wlan0
-        jump: MASQUERADE
-      register: _iptables_configured
+        table: "{{ item['table']|default(omit) }}"
+        chain: "{{ item['chain']|default(omit) }}"
+        ctstate: "{{ item['ctstate']|default(omit) }}"
+        source: "{{ item['source']|default(omit) }}"
+        in_interface: "{{ item['in_interface']|default(omit) }}"
+        out_interface: "{{ item['out_interface']|default(omit) }}"
+        jump: "{{ item['jump']|default(omit) }}"
+        state: "{{ item['state']|default(omit) }}"
       become: true
+      register: _iptables_configured
+      tags:
+        - rpi-iptables
+      with_items: "{{ jumphost_iptables_rules }}"
 
     - name: Saving IPTables Rules
       command: service netfilter-persistent save
       become: true
+      tags:
+        - rpi-iptables
       when: _iptables_configured['changed']
 
     - name: Adding Local User SSH Key
@@ -97,7 +105,7 @@
       service:
         name: networking
         state: restarted
-        args: wlan0
+        args: "{{ rpi_wireless_int }}"
       become: true
       async: 1
       poll: 0

@@ -17,6 +17,28 @@ dhcp_scope_subnet: 192.168.100
 # Defines jumphost IP address to use as bastion host to reach isolated hosts
 jumphost_ip: 172.16.24.186
 
+# Defines IPTABLES rules to define on jumphost
+jumphost_iptables_rules:
+  - chain: POSTROUTING
+    jump: MASQUERADE
+    out_interface: "{{ rpi_wireless_int}}"
+    source: "{{ dhcp_scope_subnet }}.0/24"
+    state: present
+    table: nat
+  - chain: FORWARD
+    ctstate: RELATED,ESTABLISHED
+    in_interface: "{{ rpi_wireless_int}}"
+    jump: ACCEPT
+    out_interface: "{{ rpi_wired_int }}"
+    state: present
+    table: filter
+  - chain: FORWARD
+    in_interface: "{{ rpi_wired_int }}"
+    jump: ACCEPT
+    out_interface: "{{ rpi_wireless_int }}"
+    state: present
+    table: filter
+
 # Defines the K8's GlusterFS cluster name to define for deployments
 k8s_glusterfs_cluster_name: glusterfs-cluster
 
@@ -42,3 +64,6 @@ rpi_username: pi
 
 # Defines rpi wired interface name
 rpi_wired_int: eth0
+
+# Defines rpi wireless interface name
+rpi_wireless_int: wlan0
