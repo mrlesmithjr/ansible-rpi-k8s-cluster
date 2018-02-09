@@ -8,9 +8,7 @@ isc_dhcp_listen_interfaces:
   - "{{ rpi_wired_int }}"
   # - eth1
 
-isc_dhcp_name_servers:
-  - 8.8.8.8
-  - 8.8.4.4
+isc_dhcp_name_servers: "{{ dhcp_dns_servers }}"
 
 isc_dhcp_scopes:
   - subnet: "{{ dhcp_scope_subnet }}.0"
