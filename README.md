@@ -68,7 +68,7 @@ Once you obtain the IP of the first node's wireless connection you need to
 update `jumphost_ip:` in [inventory/group_vars/all/all.yml](inventory/group_vars/all/all.yml)
 as well as change the `ansible_host` for `rpi-k8s-1 ansible_host=172.16.24.186`
 in [inventory/hosts.inv](inventory/hosts.inv). If you would like to change the
-subnet which the cluster will use, change `dhcp_scope_subnet:` in [inventory/group_vars/all/all.yml]
+subnet which the cluster will use, change `dhcp_scope_subnet:` in [inventory/group_vars/all/all.yml](inventory/group_vars/all/all.yml)
 to your desired subnet as well as the `ansible_host` addresses for the following
 nodes in [inventory/hosts.inv](inventory/hosts.inv):
 
@@ -91,7 +91,8 @@ The first node provides the following services for our cluster:
 
 > NOTE: You can also define a static route on your LAN network firewall (if supported)
 > for the subnet (`192.168.100.0/24` in my case) to the wireless IP address that
-> your first node obtains. This will allow you to communicate with all of the
+> your first node obtains. Or you may add a [static route](#routing) on your Ansible
+> control machine. This will allow you to communicate with all of the
 > cluster nodes once they get an IP via DHCP from the first node.
 
 For Kubernetes networking we are using [Weave Net](https://www.weave.works/docs/net/latest/kubernetes/kube-addon/).
@@ -121,7 +122,8 @@ there are many different ways to install `kubectl` so head over to the official
 > internal IP address of the K8s master. So in order for this to work correctly
 > you will need to setup a static route on your firewall (if supported) to the
 > subnet `192.168.100.0/24`(in our case) via the wireless IP on your first
-> node (also the K8s master).
+> node (also the K8s master). Or you may add a [static route](#routing) on your Ansible
+> control machine.
 
 ### Hardware
 
@@ -270,7 +272,8 @@ out of scope for this project (for now!).
 ### Ansible Variables
 
 Most variables that need to be adjusted based on deployment can be found in
-[inventory/group_vars/all/all.yml](inventory/group_vars/all/all.yml).
+[inventory/group_vars/all/all.yml](inventory/group_vars/all/all.yml). Make sure
+to update `jumphost_ip` to the IP address that your first node obtained via DHCP.
 
 ### Ansible Playbook
 
@@ -303,6 +306,48 @@ If you would like to simply manange the WI-FI connection you may run the followi
 
 ```bash
 ansible-playbook -i inventory playbooks/bootstrap.yml --tags rpi-manage-wifi
+```
+
+## Routing
+
+In order to use `kubectl` from your Ansible control machine, you need to ensure
+that you have a static route either on your LAN firewall or your local routing
+table on your Ansible control machine.
+
+### Adding Static Route On macOS
+
+In order to add a static route on you will need to do the following:
+
+> NOTE: Replace `172.16.24.186` with the IP of that your first node obtained via
+> DHCP. Also update `192.168.100.0/24` with the subnet that you changed the
+> variable `dhcp_scope_subnet` in `inventory/group_vars/all/all.yml` to if you
+> changed it.
+
+```bash
+sudo route -n add 192.168.100.0/24 172.16.24.186
+...
+Password:
+add net 192.168.100.0: gateway 172.16.24.186
+```
+
+You can verify that the static route is definitely configured by executing the
+following:
+
+```bash
+netstat -nr | grep 192.168.100
+...
+192.168.100        172.16.24.186      UGSc            0        0     en0
+```
+
+### Deleting Static Route on macOS
+
+If you decide to delete the static route you can do so by executing the following:
+
+```bash
+sudo route -n delete 192.168.100.0/24 172.16.24.186
+...
+Password:
+delete net 192.168.100.0: gateway 172.16.24.186
 ```
 
 ## Load Balancing And Exposing Services
