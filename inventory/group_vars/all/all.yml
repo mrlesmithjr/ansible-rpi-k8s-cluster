@@ -1,6 +1,11 @@
 ---
+# Defines DHCP handed out DNS servers
+dhcp_dns_servers:
+  - 8.8.8.8
+  - 8.8.4.4
+
 # Defines DHCP scope end address
-dhcp_scope_end_range: "{{ dhcp_scope_subnet }}.140"
+dhcp_scope_end_range: "{{ dhcp_scope_subnet }}.131"
 
 # Defines DHCP scope gateway address
 dhcp_scope_gateway: "{{ dhcp_scope_subnet }}.1"
@@ -58,6 +63,12 @@ rpi_password: raspberry
 
 # Defines the root volume device of the RPI's. This is used to update cmdline.txt
 rpi_root_device: /dev/mmcblk0p2
+
+# Defines if DNSMasq should be used for DHCP within cluster
+rpi_k8s_use_dnsmasq: true
+
+# Defines if ISC-DHCP should be used for DHCP within cluster
+rpi_k8s_use_isc_dhcp: false
 
 # Defines the default rpi username...default is pi
 rpi_username: pi

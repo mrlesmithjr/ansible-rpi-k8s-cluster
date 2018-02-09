@@ -19,6 +19,9 @@
         - [Remaining SD cards](#remaining-sd-cards)
   - [Deploying](#deploying)
     - [Ansible Variables](#ansible-variables)
+    - [DHCP For Cluster](#dhcp-for-cluster)
+      - [inventory/group_vars/all/all.yml](#inventorygroup_varsallallyml)
+      - [inventory/hosts.inv](#inventoryhostsinv)
     - [Ansible Playbook](#ansible-playbook)
     - [Managing WI-FI On First Node](#managing-wi-fi-on-first-node)
   - [Routing](#routing)
@@ -275,6 +278,64 @@ out of scope for this project (for now!).
 Most variables that need to be adjusted based on deployment can be found in
 [inventory/group_vars/all/all.yml](inventory/group_vars/all/all.yml). Make sure
 to update `jumphost_ip` to the IP address that your first node obtained via DHCP.
+
+### DHCP For Cluster
+
+> NOTE: We are using our cluster as cattle and not pets here folks. If you want
+> to hand hold your cluster nodes then you will need to go to further extents
+> beyond what this project is about. The only pet we have here is our first cluster
+> node. This is because we need to know which one we need to connect to wireless,
+> and which one routes, provides DHCP, and etc.
+
+By default we are using `DNSMasq` now to provide DHCP for the cluster nodes.
+**(Note: The first cluster node does not get it's address via DHCP, it is statically assigned)**
+Being that we are using DHCP for the cluster nodes we need to first make sure
+that we account for the number of cluster nodes we are using. With this being
+said, we need to adjust a few variables and the inventory to account for this.
+The assumption within this project is that we are using 5 cluster nodes which is
+how DHCP is configured to accomodate such.
+
+The important things to ensure that are configured correctly are listed below:
+
+#### [inventory/group_vars/all/all.yml](inventory/group_vars/all/all.yml)
+
+You should change the `dhcp_scope_subnet: 192.168.100`, `dhcp_scope_start_range: "{{ dhcp_scope_subnet }}.128"`, and `dhcp_scope_end_range: "{{ dhcp_scope_subnet }}.131"` variables to
+meet your requirements.
+
+```yaml
+# Defines DHCP scope end address
+dhcp_scope_end_range: "{{ dhcp_scope_subnet }}.131"
+
+# Defines DHCP scope start address
+dhcp_scope_start_range: "{{ dhcp_scope_subnet }}.128"
+
+# Defines dhcp scope subnet for isolated network
+dhcp_scope_subnet: 192.168.100
+```
+
+Based on the above we can ensure that we are only handing out `4` IP addresses
+to the cluster nodes because the first node again is statically assigned. This
+will account for our `5` node cluster. So if you have a different number of cluster
+nodes then you will need to adjust the start and end ranges. Why is this important?
+Because we can then ensure that we can define our inventory appropriately. And
+because we are treating all but our first node as cattle, we do not care which
+one in the stack is which, just as long as we can assign addresses to them and we
+can provision them.
+
+#### [inventory/hosts.inv](inventory/hosts.inv)
+
+Now, based on the details from above we need to ensure that our inventory is
+properly configured. So make sure that your inventory matches the DHCP range
+you defined and the nodes for the group `rpi_k8s_slaves` is accurate. Remembering
+that we are treating our slaves as cattle.
+
+```bash
+[rpi_k8s_slaves]
+rpi-k8s-2 ansible_host=192.168.100.128
+rpi-k8s-3 ansible_host=192.168.100.129
+rpi-k8s-4 ansible_host=192.168.100.130
+rpi-k8s-5 ansible_host=192.168.100.131
+```
 
 ### Ansible Playbook
 
