@@ -1,37 +1,39 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
-
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
--   [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
-    -   [Background](#background)
-        -   [Why?](#why)
-        -   [How It Works](#how-it-works)
-    -   [Requirements](#requirements)
-        -   [Software](#software)
-            -   [Ansible](#ansible)
-            -   [Kubernetes CLI Tools](#kubernetes-cli-tools)
-        -   [Hardware](#hardware)
-        -   [Installing OS](#installing-os)
-            -   [Downloading OS](#downloading-os)
-            -   [Installing OS](#installing-os-1)
-                -   [First SD Card](#first-sd-card)
-                    -   [Install OS Image](#install-os-image)
-                -   [Remaining SD cards](#remaining-sd-cards)
-    -   [Deploying](#deploying)
-        -   [Ansible Variables](#ansible-variables)
-        -   [Ansible Playbook](#ansible-playbook)
-        -   [Managing WI-FI On First Node](#managing-wi-fi-on-first-node)
-    -   [Load Balancing And Exposing Services](#load-balancing-and-exposing-services)
-        -   [Deploying Traefik](#deploying-traefik)
-        -   [Accessing Traefik WebUI](#accessing-traefik-webui)
-    -   [Persistent Storage](#persistent-storage)
-        -   [GlusterFS](#glusterfs)
-        -   [Deploying GlusterFS In Kubernetes](#deploying-glusterfs-in-kubernetes)
-        -   [Using GlusterFS In Kubernetes Pod](#using-glusterfs-in-kubernetes-pod)
-    -   [License](#license)
-    -   [Author Information](#author-information)
+- [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
+  - [Background](#background)
+    - [Why?](#why)
+    - [How It Works](#how-it-works)
+  - [Requirements](#requirements)
+    - [Software](#software)
+      - [Ansible](#ansible)
+      - [Kubernetes CLI Tools](#kubernetes-cli-tools)
+    - [Hardware](#hardware)
+    - [Installing OS](#installing-os)
+      - [Downloading OS](#downloading-os)
+      - [Installing OS](#installing-os-1)
+        - [First SD Card](#first-sd-card)
+          - [Install OS Image](#install-os-image)
+        - [Remaining SD cards](#remaining-sd-cards)
+  - [Deploying](#deploying)
+    - [Ansible Variables](#ansible-variables)
+    - [Ansible Playbook](#ansible-playbook)
+    - [Managing WI-FI On First Node](#managing-wi-fi-on-first-node)
+  - [Load Balancing And Exposing Services](#load-balancing-and-exposing-services)
+    - [Deploying Traefik](#deploying-traefik)
+    - [Accessing Traefik WebUI](#accessing-traefik-webui)
+  - [Kubernetes Dashboard](#kubernetes-dashboard)
+    - [kubectl proxy](#kubectl-proxy)
+    - [SSH Tunnel](#ssh-tunnel)
+    - [Admin Privileges](#admin-privileges)
+  - [Persistent Storage](#persistent-storage)
+    - [GlusterFS](#glusterfs)
+    - [Deploying GlusterFS In Kubernetes](#deploying-glusterfs-in-kubernetes)
+    - [Using GlusterFS In Kubernetes Pod](#using-glusterfs-in-kubernetes-pod)
+  - [License](#license)
+  - [Author Information](#author-information)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -320,6 +322,68 @@ You can access the Traefik WebUI by heading over to <http://wirelessIP:8080/dash
 (replace `wirelessIP` with your actual IP of the wireless address on the first node).
 
 ![Traefik](images/2018/02/traefik.png)
+
+## Kubernetes Dashboard
+
+We have included the Kubernetes dashboard as part of the provisioning. By
+default the dashboard is only available from within the cluster. So in order to
+connect to it you have a few options.
+
+### kubectl proxy
+
+If you have installed `kubectl` on your local machine then you can simply drop
+to your terminal and type the following:
+
+```bash
+kubectl proxy
+...
+Starting to serve on 127.0.0.1:8001
+```
+
+Now you can open your browser of choice and head [here](http://127.0.0.1:8001/ui)
+
+### SSH Tunnel
+
+> NOTE: This method will also only work if you have a static route into the cluster
+> subnet `192.168.100.0/24`.
+
+You can also use an SSH tunnel to your Kubernetes master node (any cluster node
+will work, but because the assumption is that the first node will be the only one
+accessible over WI-FI). First you need to find the `kubernetes-dashboard`
+ClusterIP, and you can do that by executing the following:
+
+```bash
+kubectl get svc --namespace kube-system kubernetes-dashboard
+...
+NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+kubernetes-dashboard   ClusterIP   10.106.41.154   <none>        443/TCP   2d
+```
+
+And from the above you will see that the ClusterIP is `10.106.41.154`. Now you
+can create the SSH tunnel as below:
+
+```bash
+ssh -L 8001:10.106.41.154:443 pi@172.16.24.186
+```
+
+Now you can open your browser of choice and head [here](https://127.0.0.1:8001/ui)
+
+### Admin Privileges
+
+If you would like to allow admin privileges without requiring either a kubeconfig
+or token then you can apply the following `ClusterRoleBinding`:
+
+```bash
+kubectl apply -f deployments/dashboard-admin.yaml
+```
+
+And now when you connect to the dashboard you can click skip and have full admin
+access. This is **obviously** not good practice, so you should delete this
+`ClusterRoleBinding` when you are done:
+
+```bash
+kubectl delete -f deployments/dashboard-admin.yaml
+```
 
 ## Persistent Storage
 
