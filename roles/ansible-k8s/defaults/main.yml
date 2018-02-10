@@ -33,11 +33,11 @@ k8s_helm_package: "helm-v{{ k8s_helm_version }}-linux-amd64.tar.gz"
 
 k8s_helm_url: https://kubernetes-helm.storage.googleapis.com
 
-k8s_helm_version: 2.3.0
+k8s_helm_version: 2.7.2
 
 k8s_package_url: https://packages.cloud.google.com
 
-k8s_pod_network_config: https://git.io/weave-kube-1.6
+k8s_pod_network_config: "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 
 k8s_reports:
   all_pod_namespaces: true

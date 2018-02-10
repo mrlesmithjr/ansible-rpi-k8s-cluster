@@ -1,6 +1,6 @@
 ---
 - name: network | Applying Pod Network
-  command: >
+  shell: >
            kubectl --kubeconfig {{ k8s_admin_config }} \
            apply -f {{ k8s_pod_network_config }}
   become: true
