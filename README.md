@@ -38,6 +38,7 @@
     - [GlusterFS](#glusterfs)
     - [Deploying GlusterFS In Kubernetes](#deploying-glusterfs-in-kubernetes)
     - [Using GlusterFS In Kubernetes Pod](#using-glusterfs-in-kubernetes-pod)
+  - [Resetting The Kubernetes Cluster](#resetting-the-kubernetes-cluster)
   - [License](#license)
   - [Author Information](#author-information)
 
@@ -562,6 +563,15 @@ spec:
       endpoints: glusterfs-cluster
       path: volume-1
       readOnly: false
+```
+
+## Resetting The Kubernetes Cluster
+
+If for any reason you would like to reset the Kubernetes cluster. You can easily
+run the following `Ansible` playbook which will take care of that for you.
+
+```bash
+ansible-playbook -i inventory/ playbooks/reset_cluster.yml
 ```
 
 ## License
