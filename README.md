@@ -224,21 +224,19 @@ some files to it.
 diskutil mountdisk /dev/disk2
 ```
 
-Now we need to change into the directory in which our SD card is mounted:
-
-```bash
-cd /Volumes/boot
-```
-
 First we need to create a blank file `ssh` onto the SD card to enable SSH when
 the Pi boots up.
 
 ```bash
-touch ssh
+touch /Volumes/boot/ssh
 ```
 
 Next we need to create the `wpa_supplicant.conf` file which will contain the
 configuration to connect to wireless. The contents of this file are listed below:
+
+```bash
+vi /Volumes/boot/wpa_supplicant.conf
+```
 
 `wpa_supplicant.conf`:
 
@@ -258,7 +256,6 @@ network={
 Now that you have finished creating these files you can then unmount the SD card:
 
 ```bash
-cd ~
 diskutil unmountdisk /dev/disk2
 ```
 
