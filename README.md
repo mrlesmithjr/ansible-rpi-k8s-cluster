@@ -23,6 +23,9 @@
       - [inventory/group_vars/all/all.yml](#inventorygroup_varsallallyml)
       - [inventory/hosts.inv](#inventoryhostsinv)
     - [Ansible Playbook](#ansible-playbook)
+      - [Gotchas](#gotchas)
+        - [sshpass error](#sshpass-error)
+        - [SSH Key Missing](#ssh-key-missing)
     - [Managing WI-FI On First Node](#managing-wi-fi-on-first-node)
   - [Routing](#routing)
     - [Adding Static Route On macOS](#adding-static-route-on-macos)
@@ -351,6 +354,62 @@ To provision the full stack you can run the following:
 
 ```bash
 ansible-playbook -i inventory playbooks/deploy.yml
+```
+
+#### Gotchas
+
+If you happen to get the following error when attempting to deploy:
+
+##### sshpass error
+
+```bash
+TASK [Gathering Facts] ***********************************************************************************************************************************************************
+Sunday 11 February 2018  04:56:29 +0000 (0:00:00.029)       0:00:00.127 *******
+fatal: [rpi-k8s-1]: FAILED! => {"msg": "to use the 'ssh' connection type with passwords, you must install the sshpass program"}
+	to retry, use: --limit @/home/vagrant/ansible-rpi-k8s-cluster/playbooks/deploy.retry
+```
+
+Head over to [here](https://everythingshouldbevirtual.com/automation/ansible-2-3-1-sshpass-error/) to resolve that issue.
+
+##### SSH Key Missing
+
+If you happen to get the following error when attempting to deploy:
+
+```bash
+TASK [Adding Local User SSH Key] *************************************************************************************************************************************************
+Sunday 11 February 2018  04:58:28 +0000 (0:00:00.022)       0:00:34.350 *******
+ [WARNING]: Unable to find '/home/vagrant/.ssh/id_rsa.pub' in expected paths.
+
+fatal: [rpi-k8s-1]: FAILED! => {"msg": "An unhandled exception occurred while running the lookup plugin 'file'. Error was a <class 'ansible.errors.AnsibleError'>, original message: could not locate file in lookup: /home/vagrant/.ssh/id_rsa.pub"}
+	to retry, use: --limit @/home/vagrant/ansible-rpi-k8s-cluster/playbooks/deploy.retry
+```
+
+You will need to generate an SSH key for your local user that you are running
+Ansible as:
+
+```raw
+ssh-keygen
+...
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/vagrant/.ssh/id_rsa):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/vagrant/.ssh/id_rsa.
+Your public key has been saved in /home/vagrant/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:pX5si9jHbpe2Ubss4eLjGlMs7J3iC7PHOwkiDCkPE74 vagrant@node0
+The key's randomart image is:
++---[RSA 2048]----+
+|                 |
+|.                |
+|.o        .      |
+|*.     . +       |
+|.*.     S o   .  |
+| E+ . .o = ... . |
+|   . .oo*o*..o.  |
+|       B=B*.*o . |
+|      o.B@==.oo  |
++----[SHA256]-----+
 ```
 
 ### Managing WI-FI On First Node
