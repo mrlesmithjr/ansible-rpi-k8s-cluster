@@ -260,6 +260,12 @@
         state: stopped
       become: true
 
+    - name: Uninstalling dphys-swapfile
+      apt:
+        name: dphys-swapfile
+        state: absent
+      become: true
+
     - name: Configuring cmdline Boot
       template:
         src: templates/cmdline.txt.j2
