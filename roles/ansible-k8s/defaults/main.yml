@@ -25,11 +25,15 @@ k8s_debian_repo_info:
   repo: "deb http://apt.kubernetes.io/ kubernetes-{{ ansible_distribution_release|lower }} main"
 
 # https://github.com/kubernetes/helm
+
+# Define architecture to install...amd64|arm
+k8s_helm_architecture: amd64
+
 k8s_helm_install: false
 
 k8s_helm_install_dir: /usr/local/bin
 
-k8s_helm_package: "helm-v{{ k8s_helm_version }}-linux-amd64.tar.gz"
+k8s_helm_package: "helm-v{{ k8s_helm_version }}-linux-{{ k8s_helm_architecture }}.tar.gz"
 
 k8s_helm_url: https://kubernetes-helm.storage.googleapis.com
 

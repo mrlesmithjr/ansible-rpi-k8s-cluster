@@ -44,7 +44,7 @@
 
 - name: helm | Copying Helm
   copy:
-    src: "{{ k8s_helm_install_dir }}/linux-amd64/helm"
+    src: "{{ k8s_helm_install_dir }}/linux-{{ k8s_helm_architecture }}/helm"
     dest: "{{ k8s_helm_install_dir }}/"
     remote_src: true
   become: true
@@ -61,10 +61,15 @@
 
 - name: helm | Cleaning Up Helm Install
   file:
-    dest: "{{ k8s_helm_install_dir }}/linux-amd64"
+    dest: "{{ k8s_helm_install_dir }}/linux-{{ k8s_helm_architecture }}"
     state: absent
   become: true
   when: inventory_hostname == k8s_master
+
+# kubectl create serviceaccount --namespace kube-system tiller
+# kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+# kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+# helm init --service-account tiller --upgrade
 
 - name: helm | Initializing Helm
   command: helm init
