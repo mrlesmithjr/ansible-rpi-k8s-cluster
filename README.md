@@ -11,9 +11,9 @@
       - [Ansible](#ansible)
       - [Kubernetes CLI Tools](#kubernetes-cli-tools)
     - [Hardware](#hardware)
-    - [Installing OS](#installing-os)
+    - [OS](#os)
       - [Downloading OS](#downloading-os)
-      - [Installing OS](#installing-os-1)
+      - [Installing OS](#installing-os)
         - [First SD Card](#first-sd-card)
           - [Install OS Image](#install-os-image)
         - [Remaining SD cards](#remaining-sd-cards)
@@ -33,6 +33,7 @@
   - [Load Balancing And Exposing Services](#load-balancing-and-exposing-services)
     - [Deploying Traefik](#deploying-traefik)
     - [Accessing Traefik WebUI](#accessing-traefik-webui)
+    - [Load Balanced NGINX Demo Deployment](#load-balanced-nginx-demo-deployment)
   - [Kubernetes Dashboard](#kubernetes-dashboard)
     - [kubectl proxy](#kubectl-proxy)
     - [SSH Tunnel](#ssh-tunnel)
@@ -145,7 +146,7 @@ this.
 -   1 x [GeauxRobot Raspberry Pi 3 5-Layer Dog Bone Stack Case](http://amzn.to/2Edbqcw)
 -   1 x 8-Port Ethernet Switch
 
-### Installing OS
+### OS
 
 Currently I am using [Raspbian Lite](http://raspbian.org/) for the OS. I did
 not orginally go with Hyperiot intentionally but may give it a go at some point.
@@ -177,7 +178,8 @@ connect to wireless.
 ###### Install OS Image
 
 > NOTE: Remember I am using a Mac so YMMV! You may also want to look into
-> [Etcher](https://etcher.io/) for a GUI based approach.
+> [Etcher](https://etcher.io/) or [PiBakery](http://www.pibakery.org/) for a
+> GUI based approach.
 
 Open up your terminal and execute the following to determine the device name of
 the SD card:
@@ -498,6 +500,54 @@ You can access the Traefik WebUI by heading over to <http://wirelessIP:8080/dash
 (replace `wirelessIP` with your actual IP of the wireless address on the first node).
 
 ![Traefik](images/2018/02/traefik.png)
+
+### Load Balanced NGINX Demo Deployment
+
+We have an example NGINX deployment [deployments/nginx_deployment.yaml](deployments/nginx_deployment.yaml)
+that you can easily spin up for learning and testing. This deployment creates
+the `demo` Namespace, `nginx-demo` Deployment with `2` replicas using the `nginx`
+image, `nginx-demo` Service, `nginx-demo` Ingress, and attaches itself to the `Traefik`
+load balancer with the path `/demo` but strips the path prefix so that the default
+NGINX container(s) will return the default page as `/` rather than `/demo` because
+that would fail. You can then connect to the default web page by connecting to
+<http://wirelessIP/demo>.
+
+To spin up this demo simply execute the following:
+
+```bash
+kubectl apply -f deployments/nginx_deployment.yaml
+```
+
+To validate all is good:
+
+```bash
+kubectl get all --namespace demo
+...
+NAME                DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deploy/nginx-demo   2         2         2            2           11m
+
+NAME                       DESIRED   CURRENT   READY     AGE
+rs/nginx-demo-76c897787b   2         2         2         11m
+
+NAME                DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deploy/nginx-demo   2         2         2            2           11m
+
+NAME                       DESIRED   CURRENT   READY     AGE
+rs/nginx-demo-76c897787b   2         2         2         11m
+
+NAME                             READY     STATUS    RESTARTS   AGE
+po/nginx-demo-76c897787b-gzwgl   1/1       Running   0          11m
+po/nginx-demo-76c897787b-pzfrl   1/1       Running   0          11m
+
+NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+svc/nginx-demo   ClusterIP   10.102.204.13   <none>        80/TCP    11m
+```
+
+To tear down this demo simply execute the following:
+
+```bash
+kubectl delete -f deployments/nginx_deployment.yaml
+```
 
 ## Kubernetes Dashboard
 
