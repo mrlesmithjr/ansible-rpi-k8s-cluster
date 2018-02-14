@@ -1,50 +1,52 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
-  - [Background](#background)
-    - [Why?](#why)
-    - [How It Works](#how-it-works)
-  - [Requirements](#requirements)
-    - [Software](#software)
-      - [Ansible](#ansible)
-      - [Kubernetes CLI Tools](#kubernetes-cli-tools)
-    - [Hardware](#hardware)
-    - [OS](#os)
-      - [Downloading OS](#downloading-os)
-      - [Installing OS](#installing-os)
-        - [First SD Card](#first-sd-card)
-          - [Install OS Image](#install-os-image)
-        - [Remaining SD cards](#remaining-sd-cards)
-  - [Deploying](#deploying)
-    - [Ansible Variables](#ansible-variables)
-    - [DHCP For Cluster](#dhcp-for-cluster)
-      - [inventory/group_vars/all/all.yml](#inventorygroup_varsallallyml)
-      - [inventory/hosts.inv](#inventoryhostsinv)
-    - [Ansible Playbook](#ansible-playbook)
-      - [Gotchas](#gotchas)
-        - [sshpass error](#sshpass-error)
-        - [SSH Key Missing](#ssh-key-missing)
-    - [Managing WI-FI On First Node](#managing-wi-fi-on-first-node)
-  - [Routing](#routing)
-    - [Adding Static Route On macOS](#adding-static-route-on-macos)
-    - [Deleting Static Route on macOS](#deleting-static-route-on-macos)
-  - [Load Balancing And Exposing Services](#load-balancing-and-exposing-services)
-    - [Deploying Traefik](#deploying-traefik)
-    - [Accessing Traefik WebUI](#accessing-traefik-webui)
-    - [Load Balanced NGINX Demo Deployment](#load-balanced-nginx-demo-deployment)
-  - [Kubernetes Dashboard](#kubernetes-dashboard)
-    - [kubectl proxy](#kubectl-proxy)
-    - [SSH Tunnel](#ssh-tunnel)
-    - [Admin Privileges](#admin-privileges)
-  - [Persistent Storage](#persistent-storage)
-    - [GlusterFS](#glusterfs)
-    - [Deploying GlusterFS In Kubernetes](#deploying-glusterfs-in-kubernetes)
-    - [Using GlusterFS In Kubernetes Pod](#using-glusterfs-in-kubernetes-pod)
-  - [Resetting The Kubernetes Cluster](#resetting-the-kubernetes-cluster)
-  - [License](#license)
-  - [Author Information](#author-information)
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+-   [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
+    -   [Background](#background)
+        -   [Why?](#why)
+        -   [How It Works](#how-it-works)
+    -   [Requirements](#requirements)
+        -   [Software](#software)
+            -   [Ansible](#ansible)
+            -   [Kubernetes CLI Tools](#kubernetes-cli-tools)
+        -   [Hardware](#hardware)
+        -   [OS](#os)
+            -   [Downloading OS](#downloading-os)
+            -   [Installing OS](#installing-os)
+                -   [First SD Card](#first-sd-card)
+                    -   [Install OS Image](#install-os-image)
+                -   [Remaining SD cards](#remaining-sd-cards)
+    -   [Deploying](#deploying)
+        -   [Ansible Variables](#ansible-variables)
+        -   [DHCP For Cluster](#dhcp-for-cluster)
+            -   [inventory/group_vars/all/all.yml](#inventorygroup_varsallallyml)
+            -   [inventory/hosts.inv](#inventoryhostsinv)
+        -   [Ansible Playbook](#ansible-playbook)
+            -   [Gotchas](#gotchas)
+                -   [sshpass error](#sshpass-error)
+                -   [SSH Key Missing](#ssh-key-missing)
+        -   [Managing WI-FI On First Node](#managing-wi-fi-on-first-node)
+    -   [Routing](#routing)
+        -   [Adding Static Route On macOS](#adding-static-route-on-macos)
+        -   [Deleting Static Route on macOS](#deleting-static-route-on-macos)
+    -   [Load Balancing And Exposing Services](#load-balancing-and-exposing-services)
+        -   [Deploying Traefik](#deploying-traefik)
+        -   [Accessing Traefik WebUI](#accessing-traefik-webui)
+        -   [Load Balanced NGINX Demo Deployment](#load-balanced-nginx-demo-deployment)
+    -   [Kubernetes Dashboard](#kubernetes-dashboard)
+        -   [kubectl proxy](#kubectl-proxy)
+        -   [SSH Tunnel](#ssh-tunnel)
+        -   [Admin Privileges](#admin-privileges)
+    -   [Persistent Storage](#persistent-storage)
+        -   [GlusterFS](#glusterfs)
+        -   [Deploying GlusterFS In Kubernetes](#deploying-glusterfs-in-kubernetes)
+        -   [Using GlusterFS In Kubernetes Pod](#using-glusterfs-in-kubernetes-pod)
+    -   [Resetting The Kubernetes Cluster](#resetting-the-kubernetes-cluster)
+    -   [License](#license)
+    -   [Author Information](#author-information)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -611,6 +613,19 @@ access. This is **obviously** not good practice, so you should delete this
 
 ```bash
 kubectl delete -f deployments/dashboard-admin.yaml
+```
+
+## Helm
+
+We have also enabled [Helm](https://github.com/kubernetes/helm) as part of the
+provisioning of the cluster. However, because we are using Raspberry Pi's and Arm
+architecture we need to make some adjustments post deployment.
+
+```bash
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+kubectl set image deploy/tiller-deploy tiller=luxas/tiller:v2.6.1 --namespace kube-system
 ```
 
 ## Persistent Storage
