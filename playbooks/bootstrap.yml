@@ -253,6 +253,13 @@
         state: present
       become: true
 
+# We install dnsutils to provide us dig on the cluster nodes
+    - name: Installing dnsutils
+      apt:
+        name: dnsutils
+        state: present
+      become: true
+
     - name: Disabling Swap
       service:
         name: dphys-swapfile

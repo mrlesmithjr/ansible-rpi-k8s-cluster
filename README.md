@@ -1,52 +1,56 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
-
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
--   [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
-    -   [Background](#background)
-        -   [Why?](#why)
-        -   [How It Works](#how-it-works)
-    -   [Requirements](#requirements)
-        -   [Software](#software)
-            -   [Ansible](#ansible)
-            -   [Kubernetes CLI Tools](#kubernetes-cli-tools)
-        -   [Hardware](#hardware)
-        -   [OS](#os)
-            -   [Downloading OS](#downloading-os)
-            -   [Installing OS](#installing-os)
-                -   [First SD Card](#first-sd-card)
-                    -   [Install OS Image](#install-os-image)
-                -   [Remaining SD cards](#remaining-sd-cards)
-    -   [Deploying](#deploying)
-        -   [Ansible Variables](#ansible-variables)
-        -   [DHCP For Cluster](#dhcp-for-cluster)
-            -   [inventory/group_vars/all/all.yml](#inventorygroup_varsallallyml)
-            -   [inventory/hosts.inv](#inventoryhostsinv)
-        -   [Ansible Playbook](#ansible-playbook)
-            -   [Gotchas](#gotchas)
-                -   [sshpass error](#sshpass-error)
-                -   [SSH Key Missing](#ssh-key-missing)
-        -   [Managing WI-FI On First Node](#managing-wi-fi-on-first-node)
-    -   [Routing](#routing)
-        -   [Adding Static Route On macOS](#adding-static-route-on-macos)
-        -   [Deleting Static Route on macOS](#deleting-static-route-on-macos)
-    -   [Load Balancing And Exposing Services](#load-balancing-and-exposing-services)
-        -   [Deploying Traefik](#deploying-traefik)
-        -   [Accessing Traefik WebUI](#accessing-traefik-webui)
-        -   [Load Balanced NGINX Demo Deployment](#load-balanced-nginx-demo-deployment)
-    -   [Kubernetes Dashboard](#kubernetes-dashboard)
-        -   [kubectl proxy](#kubectl-proxy)
-        -   [SSH Tunnel](#ssh-tunnel)
-        -   [Admin Privileges](#admin-privileges)
-    -   [Persistent Storage](#persistent-storage)
-        -   [GlusterFS](#glusterfs)
-        -   [Deploying GlusterFS In Kubernetes](#deploying-glusterfs-in-kubernetes)
-        -   [Using GlusterFS In Kubernetes Pod](#using-glusterfs-in-kubernetes-pod)
-    -   [Resetting The Kubernetes Cluster](#resetting-the-kubernetes-cluster)
-    -   [License](#license)
-    -   [Author Information](#author-information)
+- [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
+  - [Background](#background)
+    - [Why?](#why)
+    - [How It Works](#how-it-works)
+  - [Requirements](#requirements)
+    - [Software](#software)
+      - [Ansible](#ansible)
+      - [Kubernetes CLI Tools](#kubernetes-cli-tools)
+    - [Hardware](#hardware)
+    - [OS](#os)
+      - [Downloading OS](#downloading-os)
+      - [Installing OS](#installing-os)
+        - [First SD Card](#first-sd-card)
+          - [Install OS Image](#install-os-image)
+        - [Remaining SD cards](#remaining-sd-cards)
+  - [Deploying](#deploying)
+    - [Ansible Variables](#ansible-variables)
+    - [DHCP For Cluster](#dhcp-for-cluster)
+      - [inventory/group_vars/all/all.yml](#inventorygroup_varsallallyml)
+      - [inventory/hosts.inv](#inventoryhostsinv)
+    - [Ansible Playbook](#ansible-playbook)
+      - [Gotchas](#gotchas)
+        - [sshpass error](#sshpass-error)
+        - [SSH Key Missing](#ssh-key-missing)
+    - [Managing WI-FI On First Node](#managing-wi-fi-on-first-node)
+  - [Routing](#routing)
+    - [Adding Static Route On macOS](#adding-static-route-on-macos)
+    - [Deleting Static Route on macOS](#deleting-static-route-on-macos)
+  - [Load Balancing And Exposing Services](#load-balancing-and-exposing-services)
+    - [Deploying Traefik](#deploying-traefik)
+    - [Accessing Traefik WebUI](#accessing-traefik-webui)
+    - [Load Balanced NGINX Demo Deployment](#load-balanced-nginx-demo-deployment)
+  - [Kubernetes Dashboard](#kubernetes-dashboard)
+    - [kubectl proxy](#kubectl-proxy)
+    - [SSH Tunnel](#ssh-tunnel)
+    - [Admin Privileges](#admin-privileges)
+  - [Cluster DNS and Service Discovery](#cluster-dns-and-service-discovery)
+    - [CoreDNS](#coredns)
+      - [Update Existing Cluster Using `kubectl`](#update-existing-cluster-using-kubectl)
+      - [Update Existing Cluster Using `kubeadm`](#update-existing-cluster-using-kubeadm)
+      - [Verifying CoreDNS](#verifying-coredns)
+  - [Helm](#helm)
+  - [Persistent Storage](#persistent-storage)
+    - [GlusterFS](#glusterfs)
+    - [Deploying GlusterFS In Kubernetes](#deploying-glusterfs-in-kubernetes)
+    - [Using GlusterFS In Kubernetes Pod](#using-glusterfs-in-kubernetes-pod)
+  - [Resetting The Kubernetes Cluster](#resetting-the-kubernetes-cluster)
+  - [License](#license)
+  - [Author Information](#author-information)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -613,6 +617,123 @@ access. This is **obviously** not good practice, so you should delete this
 
 ```bash
 kubectl delete -f deployments/dashboard-admin.yaml
+```
+
+## Cluster DNS and Service Discovery
+
+### [CoreDNS](https://coredns.io)
+
+You may wish to update the default `DNS` service to use `CoreDNS` to learn and/or
+whatever you want. The good news is that `CoreDNS` will eventually be the default
+`DNS` replacing `kube-dns`. So may as well start testing now!
+
+#### Update Existing Cluster Using `kubectl`
+
+> NOTE: CoreDNS can run in place of the standard Kube-DNS in Kubernetes. Using
+> the kubernetes plugin, CoreDNS will read zone data from a Kubernetes cluster.
+
+If you would like to replace the default `DNS` service installed during
+provisioning with `CoreDNS`, you can easily do so by doing the following:
+
+```bash
+cd deployments
+./deploy-coredns.sh | kubectl apply -f -
+kubectl delete --namespace=kube-system deployment kube-dns
+```
+
+#### Update Existing Cluster Using `kubeadm`
+
+The following can be used if you would rather use `kubeadm` to update your
+cluster to use `CoreDNS` rather than using the `kubectl` method above. First you
+should check to make sure that this method is possible within your cluster.
+
+```raw
+kubeadm upgrade plan  --feature-gates CoreDNS=true
+...
+[preflight] Running pre-flight checks.
+[upgrade] Making sure the cluster is healthy:
+[upgrade/config] Making sure the configuration is correct:
+[upgrade/config] Reading configuration from the cluster...
+[upgrade/config] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[upgrade] Fetching available versions to upgrade to
+[upgrade/versions] Cluster version: v1.9.3
+[upgrade/versions] kubeadm version: v1.9.2
+[upgrade/versions] Latest stable version: v1.9.3
+[upgrade/versions] Latest version in the v1.9 series: v1.9.3
+
+Awesome, you're up-to-date! Enjoy!
+```
+
+#### Verifying CoreDNS
+
+Checking `pod` status:
+
+```bash
+kubectl get pods --namespace kube-system -o wide
+...
+NAME                                          READY     STATUS    RESTARTS   AGE       IP                NODE
+coredns-7f969bcf8c-458jv                      1/1       Running   0          22m       10.34.0.3         rpi-k8s-4
+coredns-7f969bcf8c-nfpf7                      1/1       Running   0          22m       10.40.0.3         rpi-k8s-5
+etcd-rpi-k8s-1                                1/1       Running   0          4d        192.168.100.1     rpi-k8s-1
+heapster-8556df7b6b-cplz6                     1/1       Running   0          4d        10.34.0.0         rpi-k8s-4
+kube-apiserver-rpi-k8s-1                      1/1       Running   2          4d        192.168.100.1     rpi-k8s-1
+kube-controller-manager-rpi-k8s-1             1/1       Running   2          4d        192.168.100.1     rpi-k8s-1
+kube-proxy-644h6                              1/1       Running   0          4d        192.168.100.130   rpi-k8s-4
+kube-proxy-8dfbr                              1/1       Running   0          4d        192.168.100.1     rpi-k8s-1
+kube-proxy-fcpqp                              1/1       Running   0          4d        192.168.100.131   rpi-k8s-5
+kube-proxy-kh4jq                              1/1       Running   0          4d        192.168.100.128   rpi-k8s-2
+kube-proxy-tjckk                              1/1       Running   0          4d        192.168.100.129   rpi-k8s-3
+kube-scheduler-rpi-k8s-1                      1/1       Running   2          4d        192.168.100.1     rpi-k8s-1
+kubernetes-dashboard-6686846dfd-z62q4         1/1       Running   0          4d        10.40.0.0         rpi-k8s-5
+monitoring-grafana-6859cdd4bd-7bk5c           1/1       Running   0          4d        10.45.0.0         rpi-k8s-3
+monitoring-influxdb-59cb7cb77b-rpmth          1/1       Running   0          4d        10.46.0.0         rpi-k8s-2
+tiller-deploy-6499c74d46-hjgcr                1/1       Running   0          2d        10.40.0.1         rpi-k8s-5
+traefik-ingress-controller-6ffd67bfcf-wb5m2   1/1       Running   0          2d        192.168.100.1     rpi-k8s-1
+weave-net-7xfql                               2/2       Running   12         4d        192.168.100.1     rpi-k8s-1
+weave-net-kxw2h                               2/2       Running   2          4d        192.168.100.129   rpi-k8s-3
+weave-net-rxsfg                               2/2       Running   2          4d        192.168.100.128   rpi-k8s-2
+weave-net-rzwd2                               2/2       Running   2          4d        192.168.100.131   rpi-k8s-5
+weave-net-wnk26                               2/2       Running   2          4d        192.168.100.130   rpi-k8s-4
+```
+
+Checking `deployment` status:
+
+```bash
+kubectl get deployment --namespace kube-system
+...
+NAME                         DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+coredns                      2         2         2            2           28m
+heapster                     1         1         1            1           4d
+kubernetes-dashboard         1         1         1            1           4d
+monitoring-grafana           1         1         1            1           4d
+monitoring-influxdb          1         1         1            1           4d
+tiller-deploy                1         1         1            1           2d
+traefik-ingress-controller   1         1         1            1           2d
+```
+
+Checking `dig` results:
+
+First you need to find the `CLUSTER-IP`:
+
+```bash
+kubectl get service --namespace kube-system kube-dns
+...
+NAME       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
+kube-dns   ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP   50m
+```
+
+Now you can use `dig`:
+
+```raw
+dig @10.96.0.10 default.svc.cluster.local +noall +answer
+...
+; <<>> DiG 9.10.3-P4-Raspbian <<>> @10.96.0.10 default.svc.cluster.local +noall +answer
+; (1 server found)
+;; global options: +cmd
+default.svc.cluster.local. 5	IN	A	10.45.0.2
+default.svc.cluster.local. 5	IN	A	10.96.0.1
+default.svc.cluster.local. 5	IN	A	10.34.0.2
+default.svc.cluster.local. 5	IN	A	10.109.20.92
 ```
 
 ## Helm
