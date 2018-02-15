@@ -498,7 +498,7 @@ be deployed to expose cluster services.
 You can deploy `Traefik` by running the following:
 
 ```bash
-kubectl deploy -f deployments/traefik.yaml
+kubectl apply -f deployments/traefik.yaml
 ```
 
 ### Accessing Traefik WebUI
