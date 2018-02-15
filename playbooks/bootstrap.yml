@@ -238,13 +238,24 @@
 
 - hosts: rpi_k8s_slaves
   any_errors_fatal: true
-  pre_tasks:
+  tasks:
     - name: Updating /etc/hosts
       template:
         src: templates/hosts.j2
         dest: /etc/hosts
       become: true
 
+- hosts: rpi_k8s
+  any_errors_fatal: true
+  roles:
+    - role: ansible-apt-cacher-ng
+      become: true
+      tags:
+        - apt-cacher-ng
+
+- hosts: rpi_k8s_slaves
+  any_errors_fatal: true
+  pre_tasks:
     - name: Updating APT Cache
       apt:
         cache_valid_time: 1800
