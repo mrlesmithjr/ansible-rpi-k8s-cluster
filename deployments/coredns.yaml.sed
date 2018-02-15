@@ -54,6 +54,7 @@ data:
           upstream /etc/resolv.conf
           fallthrough in-addr.arpa ip6.arpa
         }
+        loadbalance round_robin
         prometheus :9153
         proxy . /etc/resolv.conf
         cache 30
@@ -93,6 +94,13 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: /etc/coredns
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
         ports:
         - containerPort: 53
           name: dns
