@@ -1,14 +1,15 @@
 ---
 # Defines DHCP handed out DNS servers
 dhcp_dns_servers:
-  - 8.8.8.8
-  - 8.8.4.4
+  - "{{ hostvars[groups['rpi_k8s_master'][0]]['rpi_k8_static_ip_addr'] }}"
+  # - 8.8.8.8
+  # - 8.8.4.4
 
 # Defines DHCP scope end address
 dhcp_scope_end_range: "{{ dhcp_scope_subnet }}.131"
 
 # Defines DHCP scope gateway address
-dhcp_scope_gateway: "{{ dhcp_scope_subnet }}.1"
+dhcp_scope_gateway: "{{ hostvars[groups['rpi_k8s_master'][0]]['rpi_k8_static_ip_addr'] }}"
 
 # Defines DHCP scope subnet mask
 dhcp_scope_netmask: 255.255.255.0
