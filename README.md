@@ -103,6 +103,7 @@ The first node provides the following services for our cluster:
 -   DHCP for all of the other nodes (only listening on `eth0`)
 -   Gateway services for other nodes to connect to the internet and such.
     -   An IPTABLES Masquerade rule NATs traffic from `eth0` through `wlan0`
+-   [Apt-Cacher NG](https://www.unix-ag.uni-kl.de/~bloch/acng/) - A package caching proxy to speed up package downloads/installs.
 
 > NOTE: You can also define a static route on your LAN network firewall (if supported)
 > for the subnet (`192.168.100.0/24` in my case) to the wireless IP address that
