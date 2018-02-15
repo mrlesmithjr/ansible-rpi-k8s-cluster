@@ -73,6 +73,8 @@
 
     - name: Waiting For Host To Respond
       wait_for_connection:
+        delay: 20
+      when: _restarting_host['changed']
     # - name: Wait 300 seconds for port 22 to become open and contain "OpenSSH"
     #   wait_for:
     #     port: 22
@@ -142,6 +144,7 @@
     # This will fail if the IP address changes on the host
     - name: Waiting For WI-FI To Resume
       wait_for_connection:
+        delay: 20
       tags:
         - rpi-manage-wifi
       when: _wifi_restarted['changed']
@@ -206,12 +209,15 @@
       shell: cat /var/lib/misc/dnsmasq.leases | awk '{ print $4,$3,$2 }'
       register: _dnsmasq_dhcp_leases
       changed_when: false
+      retries: 18
+      delay: 10
       until: >
              _dnsmasq_dhcp_leases['stdout_lines'] != [] and
              _dnsmasq_dhcp_leases['stdout_lines']|length == (rpi_nodes - 1 )
       when: rpi_k8s_use_dnsmasq
 
 - hosts: rpi_k8s_slaves
+  any_errors_fatal: true
   tasks:
     - name: Waiting For Slaves To Respond
       wait_for_connection:
@@ -231,6 +237,7 @@
     #   with_items: "{{ groups['rpi_k8s_slaves'] }}"
 
 - hosts: rpi_k8s_slaves
+  any_errors_fatal: true
   pre_tasks:
     - name: Updating /etc/hosts
       template:
@@ -246,6 +253,7 @@
     - role: ansible-change-hostname
 
 - hosts: rpi_k8s
+  any_errors_fatal: true
   tasks:
     - name: Installing vim
       apt:
@@ -293,6 +301,7 @@
 
     - name: Waiting For Host To Respond
       wait_for_connection:
+        delay: 20
       when: _reboot_slaves['changed']
 
     # - command: ping -c 2 {{ hostvars[inventory_hostname]['ansible_host'] }}
@@ -316,6 +325,7 @@
 
     - name: Waiting For Host To Respond
       wait_for_connection:
+        delay: 20
       when: _reboot_master['changed']
 
     # - name: Wait 300 seconds for port 22 to become open and contain "OpenSSH"
