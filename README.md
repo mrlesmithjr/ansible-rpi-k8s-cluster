@@ -1,6 +1,6 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
   - [Background](#background)
@@ -48,6 +48,9 @@
     - [GlusterFS](#glusterfs)
     - [Deploying GlusterFS In Kubernetes](#deploying-glusterfs-in-kubernetes)
     - [Using GlusterFS In Kubernetes Pod](#using-glusterfs-in-kubernetes-pod)
+  - [Monitoring](#monitoring)
+    - [Heapster](#heapster)
+    - [InfluxDB/Grafana](#influxdbgrafana)
   - [Resetting The Kubernetes Cluster](#resetting-the-kubernetes-cluster)
   - [License](#license)
   - [Author Information](#author-information)
@@ -807,6 +810,58 @@ spec:
       path: volume-1
       readOnly: false
 ```
+
+## Monitoring
+
+We have included a few deployments to get some monitoring of your environment
+going as well. These include [Heapster](https://github.com/kubernetes/heapster),
+[InfluxDB](https://www.influxdata.com/time-series-platform/influxdb/), and
+[Grafana](https://grafana.com/).
+
+### Heapster
+
+In order to get cluster metrics into InfluxDB and Grafana we must first deploy
+Heapster. Heapster enables container monitoring and performance analysis for
+Kubernetes.
+To deploy Heapster simply run the following:
+
+```bash
+kubectl apply -f deployments/heapster.yaml
+...
+clusterrolebinding "heapster" created
+serviceaccount "heapster" created
+deployment "heapster" created
+service "heapster" created
+```
+
+### InfluxDB/Grafana
+
+After deploying [Heapster](#heapster) we are now ready to deploy InfluxDB and
+Grafana.
+
+> NOTE: The current deployment of InfluxDB/Grafana depends on [GlusterFS](#glusterfs)
+> being deployed. So if that has not been deployed yet you will either need to or
+> adjust the `influx-grafana.yaml` deployment to adjust for the volumes. Also
+> [Traefik](#deploying-traefik) for load balancing is required to properly connect
+> to Grafana's WebUI.
+
+```bash
+kubectl apply -f deployments/influx-grafana.yaml
+...
+deployment "monitoring-grafana" created
+service "monitoring-grafana" created
+deployment "monitoring-influxdb" created
+service "monitoring-influxdb" created
+ingress "monitoring-grafana" created
+```
+
+After the deployment above has been successful you should be able to connect to
+the Grafana WebUI at `http://wirelessIP/grafana`.
+
+![Grafana WebUI](images/2018/02/grafana-webui.png)
+
+And from the screenshot above you will notice that two dashboards
+(`cluster` and `pods`) are already pre-loaded during deployment.
 
 ## Resetting The Kubernetes Cluster
 
