@@ -248,6 +248,7 @@
 - hosts: rpi_k8s
   any_errors_fatal: true
   roles:
+    - role: ansible-ntp
     - role: ansible-apt-cacher-ng
       become: true
       tags:
