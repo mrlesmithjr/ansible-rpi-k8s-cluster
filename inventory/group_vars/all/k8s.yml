@@ -17,3 +17,5 @@ k8s_pod_network_config: "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl
 
 k8s_users:
   - user: pi
+
+k8s_version: 1.9.3
