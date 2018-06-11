@@ -8,7 +8,9 @@ k8s_advertise_address_int: enp0s8
 
 k8s_advertise_bind_port: 6443
 
-k8s_cluster_group: k8s
+k8s_master_group: rpi_k8s_master
+
+k8s_cluster_group: rpi_k8s
 
 k8s_cluster_init_skip_ca_verification: false
 
