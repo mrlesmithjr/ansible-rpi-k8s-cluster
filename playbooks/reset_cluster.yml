@@ -26,7 +26,7 @@
 - hosts: rpi_k8s_master
   tasks:
     - name: Resetting K8s Master
-      command: kubeadm reset
+      command: kubeadm reset -f
       become: true
 
     - name: Ensuring All Default IPTABLES Chains Are Set To ACCEPT
