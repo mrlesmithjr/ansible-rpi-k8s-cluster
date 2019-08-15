@@ -1,6 +1,8 @@
 ---
 k8s_advertise_address_int: "{{ rpi_wired_int }}"
 
+k8s_master_group: rpi_k8s_master
+
 k8s_cluster_group: rpi_k8s
 
 k8s_cluster_init_skip_ca_verification: true
