@@ -1,12 +1,12 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
   - [Background](#background)
     - [Why?](#why)
     - [How It Works](#how-it-works)
   - [Requirements](#requirements)
+    - [Cloning Repo](#cloning-repo)
     - [Software](#software)
       - [Ansible](#ansible)
       - [Kubernetes CLI Tools](#kubernetes-cli-tools)
@@ -104,10 +104,10 @@ rpi-k8s-5 ansible_host=192.168.100.131
 
 The first node provides the following services for our cluster:
 
--   DHCP for all of the other nodes (only listening on `eth0`)
--   Gateway services for other nodes to connect to the internet and such.
-    -   An IPTABLES Masquerade rule NATs traffic from `eth0` through `wlan0`
--   [Apt-Cacher NG](https://www.unix-ag.uni-kl.de/~bloch/acng/) - A package caching proxy to speed up package downloads/installs.
+- DHCP for all of the other nodes (only listening on `eth0`)
+- Gateway services for other nodes to connect to the internet and such.
+  - An IPTABLES Masquerade rule NATs traffic from `eth0` through `wlan0`
+- [Apt-Cacher NG](https://www.unix-ag.uni-kl.de/~bloch/acng/) - A package caching proxy to speed up package downloads/installs.
 
 > NOTE: You can also define a static route on your LAN network firewall (if supported)
 > for the subnet (`192.168.100.0/24` in my case) to the wireless IP address that
@@ -118,6 +118,15 @@ The first node provides the following services for our cluster:
 For Kubernetes networking we are using [Weave Net](https://www.weave.works/docs/net/latest/kubernetes/kube-addon/).
 
 ## Requirements
+
+### Cloning Repo
+
+Because we use submodules for many components within this project, we need to
+ensure that we get them as part of the cloning process.
+
+```bash
+git clone https://github.com/mrlesmithjr/ansible-rpi-k8s-cluster.git --recurse-submodules
+```
 
 ### Software
 
@@ -137,7 +146,7 @@ there are many different ways to install `kubectl` so head over to the official
 
 > NOTE: The Ansible playbook [playbooks/deployments.yml](playbooks/deployments.yml)
 > fetches the `admin.conf` from the K8s master and copies this to your local
-> $HOME/.kube/config. This allows us to run `kubectl` commands remotely to the
+> \$HOME/.kube/config. This allows us to run `kubectl` commands remotely to the
 > cluster. There is a catch here though. The certificate is signed with the
 > internal IP address of the K8s master. So in order for this to work correctly
 > you will need to setup a static route on your firewall (if supported) to the
@@ -150,12 +159,12 @@ there are many different ways to install `kubectl` so head over to the official
 The following list is the hardware which I am using currently while developing
 this.
 
--   5 x [Raspberry Pi 3](http://amzn.to/2EbDKfq)
--   2 x [6pack - Cat 6 - Flat Ethernet Cables](http://amzn.to/2nKvywD)
--   1 x [Anker PowerPort 6 - 60W 6-Port Charging Hub](http://amzn.to/2ERkV2q)
--   5 x [Samsung 32GB 95MB/s MicroSD Evo Memory Card](http://amzn.to/2skSlno)
--   1 x [GeauxRobot Raspberry Pi 3 5-Layer Dog Bone Stack Case](http://amzn.to/2Edbqcw)
--   1 x 8-Port Ethernet Switch
+- 5 x [Raspberry Pi 3](http://amzn.to/2EbDKfq)
+- 2 x [6pack - Cat 6 - Flat Ethernet Cables](http://amzn.to/2nKvywD)
+- 1 x [Anker PowerPort 6 - 60W 6-Port Charging Hub](http://amzn.to/2ERkV2q)
+- 5 x [Samsung 32GB 95MB/s MicroSD Evo Memory Card](http://amzn.to/2skSlno)
+- 1 x [GeauxRobot Raspberry Pi 3 5-Layer Dog Bone Stack Case](http://amzn.to/2Edbqcw)
+- 1 x 8-Port Ethernet Switch
 
 ### OS
 
@@ -426,6 +435,7 @@ The key's randomart image is:
 ```
 
 ##### Fixing Broken GlusterFS Repo
+
 If you experience the following [issue](https://github.com/mrlesmithjr/ansible-rpi-k8s-cluster/issues/7) you can
 run the playbook [fix_glusterfs_repo.yml](playbooks/fix_glusterfs_repo.yml) which
 will remove the broken `3.10` repo. Once that is done you should be good to go
@@ -811,11 +821,11 @@ spec:
         - mountPath: /mnt/glusterfs
           name: glusterfsvol
   volumes:
-  - name: glusterfsvol
-    glusterfs:
-      endpoints: glusterfs-cluster
-      path: volume-1
-      readOnly: false
+    - name: glusterfsvol
+      glusterfs:
+        endpoints: glusterfs-cluster
+        path: volume-1
+        readOnly: false
 ```
 
 ## Monitoring
@@ -887,6 +897,6 @@ MIT
 
 Larry Smith Jr.
 
--   [EverythingShouldBeVirtual](http://everythingshouldbevirtual.com)
--   [@mrlesmithjr](https://www.twitter.com/mrlesmithjr)
--   <mailto:mrlesmithjr@gmail.com>
+- [EverythingShouldBeVirtual](http://everythingshouldbevirtual.com)
+- [@mrlesmithjr](https://www.twitter.com/mrlesmithjr)
+- <mailto:mrlesmithjr@gmail.com>
