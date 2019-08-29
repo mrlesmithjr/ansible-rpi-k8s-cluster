@@ -1,0 +1,36 @@
+[submodule "deployments/consul-helm"]
+	path = deployments/consul-helm
+	url = https://github.com/hashicorp/consul-helm.git
+[submodule "roles/ansible-apt-cacher-ng"]
+	path = roles/ansible-apt-cacher-ng
+	url = https://github.com/mrlesmithjr/ansible-apt-cacher-ng.git
+[submodule "roles/ansible-change-hostname"]
+	path = roles/ansible-change-hostname
+	url = https://github.com/mrlesmithjr/ansible-change-hostname.git
+[submodule "roles/ansible-dnsmasq"]
+	path = roles/ansible-dnsmasq
+	url = https://github.com/mrlesmithjr/ansible-dnsmasq.git
+[submodule "roles/ansible-docker"]
+	path = roles/ansible-docker
+	url = https://github.com/mrlesmithjr/ansible-docker.git
+[submodule "roles/ansible-etc-hosts"]
+	path = roles/ansible-etc-hosts
+	url = https://github.com/mrlesmithjr/ansible-etc-hosts.git
+[submodule "roles/ansible-glusterfs"]
+	path = roles/ansible-glusterfs
+	url = https://github.com/mrlesmithjr/ansible-glusterfs.git
+[submodule "roles/ansible-isc-dhcp"]
+	path = roles/ansible-isc-dhcp
+	url = https://github.com/mrlesmithjr/ansible-isc-dhcp.git
+[submodule "roles/ansible-k8s"]
+	path = roles/ansible-k8s
+	url = https://github.com/mrlesmithjr/ansible-k8s.git
+[submodule "roles/ansible-ntp"]
+	path = roles/ansible-ntp
+	url = https://github.com/mrlesmithjr/ansible-ntp.git
+[submodule "roles/ansible-sshd"]
+	path = roles/ansible-sshd
+	url = https://github.com/mrlesmithjr/ansible-sshd.git
+[submodule "roles/ansible-timezone"]
+	path = roles/ansible-timezone
+	url = https://github.com/mrlesmithjr/ansible-timezone.git

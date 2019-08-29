@@ -1,7 +1,0 @@
----
-- name: service | Ensuring Docker Service Is Started And Enabled On Boot
-  service:
-    name: "docker"
-    state: "started"
-    enabled: yes
-  become: true
