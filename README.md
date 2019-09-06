@@ -763,11 +763,15 @@ We have also enabled [Helm](https://github.com/kubernetes/helm) as part of the
 provisioning of the cluster. However, because we are using Raspberry Pi's and Arm
 architecture we need to make some adjustments post deployment.
 
-```bash
+<!-- ```bash
 kubectl create serviceaccount --namespace kube-system tiller
 kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
 kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
 kubectl set image deploy/tiller-deploy tiller=luxas/tiller:v2.6.1 --namespace kube-system
+``` -->
+
+```bash
+kubectl set image deploy/tiller-deploy tiller=jessestuart/tiller:v2.9.0 --namespace kube-system
 ```
 
 ## Persistent Storage
