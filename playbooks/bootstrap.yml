@@ -7,13 +7,13 @@
       set_fact:
         _current_dhcp_scope_end: "{{ dhcp_scope_end_range.split('.')[3] }}"
 
-# We need to subtract here to account for the starting ip as well as for the
-# first node as it will not need a DHCP address
+    # We need to subtract here to account for the starting ip as well as for the
+    # first node as it will not need a DHCP address
     - name: Calculating The Required DHCP Scope Ending IP
       set_fact:
         _required_dhcp_scope_end: "{{ (dhcp_scope_start_range.split('.')[3]|int - 1) + (rpi_nodes - 1) }}"
 
-# We fail here if the DHCP ending address is not correct based on the number of nodes.
+    # We fail here if the DHCP ending address is not correct based on the number of nodes.
     - name: Fail When DHCP Scope Ending Is Not Correct
       fail: msg="dhcp_scope_end_range should be set to {{ _required_dhcp_scope_end }}"
       when: _required_dhcp_scope_end != _current_dhcp_scope_end
@@ -22,13 +22,13 @@
   pre_tasks:
     - name: Checking To Make Sure Both DNSMasq and ISC-DHCP Are Not True
       fail: msg="Bailing out. Choose either DNSMasq or ISC-DHCP, not both"
-      when: >
-            rpi_k8s_use_isc_dhcp and
-            rpi_k8s_use_dnsmasq
+      when:
+        - rpi_k8s_use_isc_dhcp
+        - rpi_k8s_use_dnsmasq
 
     - name: Updating APT Cache
       apt:
-        cache_valid_time: 1800
+        # cache_valid_time: 3600
       become: true
 
     - name: Installing iptables-persistent
@@ -123,10 +123,10 @@
       register: _wifi_configured
       tags:
         - rpi-manage-wifi
-      when: >
-            k8s_wifi_country is defined and
-            k8s_wifi_password is defined and
-            k8s_wifi_ssid is defined
+      when:
+        - k8s_wifi_country is defined
+        - k8s_wifi_password is defined
+        - k8s_wifi_ssid is defined
 
     - name: Restarting Networking After WI-FI Configured
       service:
@@ -155,9 +155,9 @@
         state: absent
         purge: true
       become: true
-      when: >
-            rpi_k8s_use_isc_dhcp and
-            not rpi_k8s_use_dnsmasq
+      when:
+        - rpi_k8s_use_isc_dhcp
+        - not rpi_k8s_use_dnsmasq
 
     - name: Uninstalling ISC-DHCP
       apt:
@@ -165,20 +165,20 @@
         state: absent
         purge: true
       become: true
-      when: >
-            rpi_k8s_use_dnsmasq and
-            not rpi_k8s_use_isc_dhcp
+      when:
+        - rpi_k8s_use_dnsmasq
+        - not rpi_k8s_use_isc_dhcp
 
   roles:
     - role: ansible-change-hostname
     - role: ansible-dnsmasq
-      when: >
-            rpi_k8s_use_dnsmasq and
-            not rpi_k8s_use_isc_dhcp
+      when:
+        - rpi_k8s_use_dnsmasq
+        - not rpi_k8s_use_isc_dhcp
     - role: ansible-isc-dhcp
-      when: >
-            rpi_k8s_use_isc_dhcp and
-            not rpi_k8s_use_dnsmasq
+      when:
+        - rpi_k8s_use_isc_dhcp
+        - not rpi_k8s_use_dnsmasq
 
   post_tasks:
     - name: Ensuring dnsmasq Is Started And Enabled On Boot
@@ -187,9 +187,9 @@
         state: started
         enabled: true
       become: true
-      when: >
-            rpi_k8s_use_dnsmasq and
-            not rpi_k8s_use_isc_dhcp
+      when:
+        - rpi_k8s_use_dnsmasq
+        - not rpi_k8s_use_isc_dhcp
 
     - name: Ensuring isc-dhcp-server Is Started And Enabled On Boot
       service:
@@ -197,9 +197,9 @@
         state: started
         enabled: true
       become: true
-      when: >
-            rpi_k8s_use_isc_dhcp and
-            not rpi_k8s_use_dnsmasq
+      when:
+        - rpi_k8s_use_isc_dhcp
+        - not rpi_k8s_use_dnsmasq
 
 - hosts: rpi_k8s_master
   vars:
@@ -212,9 +212,30 @@
       retries: 18
       delay: 10
       until: >
-             _dnsmasq_dhcp_leases['stdout_lines'] != [] and
-             _dnsmasq_dhcp_leases['stdout_lines']|length == (rpi_nodes - 1 )
+        _dnsmasq_dhcp_leases['stdout_lines'] != [] and
+        _dnsmasq_dhcp_leases['stdout_lines']|length == (rpi_nodes - 1)
       when: rpi_k8s_use_dnsmasq
+
+    - name: Capturing SSH Keys
+      command: ssh-keyscan {{ hostvars[item]['ansible_host'] }}
+      loop: "{{ groups['rpi_k8s_slaves'] }}"
+      register: ssh_keys
+      changed_when: false
+
+    - name: Ensuring Slave SSH Keys Are Added
+      known_hosts:
+        name: "{{ hostvars[item['item']]['ansible_host'] }}"
+        key: "{{ item['stdout'] }}"
+        state: present
+      loop: "{{ ssh_keys['results'] }}"
+
+    # - name: Ensuring Slave SSH Keys Are Added
+    #   lineinfile:
+    #     path: $HOME/.ssh/known_hosts
+    #     create: true
+    #     state: present
+    #     line: "{{ lookup('pipe', 'ssh-keyscan -trsa ' + hostvars[item]['ansible_host']) }}"
+    #   loop: "{{ groups['rpi_k8s_slaves'] }}"
 
 - hosts: rpi_k8s_slaves
   any_errors_fatal: true
@@ -273,7 +294,7 @@
         state: present
       become: true
 
-# We install dnsutils to provide us dig on the cluster nodes
+    # We install dnsutils to provide us dig on the cluster nodes
     - name: Installing dnsutils
       apt:
         name: dnsutils
@@ -307,9 +328,9 @@
       ignore_errors: true
       become: true
       register: _reboot_slaves
-      when: >
-            _cmdline_boot['changed'] and
-            inventory_hostname in groups['rpi_k8s_slaves']
+      when:
+        - _cmdline_boot['changed']
+        - inventory_hostname in groups['rpi_k8s_slaves']
 
     - name: Waiting For Host To Respond
       wait_for_connection:
@@ -331,15 +352,14 @@
       ignore_errors: true
       become: true
       register: _reboot_master
-      when: >
-            _cmdline_boot['changed'] and
-            inventory_hostname in groups['rpi_k8s_master']
+      when:
+        - _cmdline_boot['changed']
+        - inventory_hostname in groups['rpi_k8s_master']
 
     - name: Waiting For Host To Respond
       wait_for_connection:
         delay: 20
       when: _reboot_master['changed']
-
     # - name: Wait 300 seconds for port 22 to become open and contain "OpenSSH"
     #   wait_for:
     #     port: 22

@@ -29,6 +29,8 @@ dnsmasq_dhcp_scopes:
     end: "{{ dhcp_scope_end_range }}"
     netmask: "{{ dhcp_scope_netmask }}"
 
+dnsmasq_disable_lo: true
+
 # Defines if DHCP services are provided by DNSMASQ
 dnsmasq_enable_dhcp: true
 
