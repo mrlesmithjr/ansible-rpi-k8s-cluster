@@ -519,6 +519,11 @@ You can deploy `Traefik` by running the following:
 
 ```bash
 kubectl apply -f deployments/traefik.yaml
+...
+serviceaccount/traefik-ingress-controller created
+clusterrolebinding.rbac.authorization.k8s.io/traefik-ingress-controller created
+configmap/traefik-cfg created
+deployment.apps/traefik-ingress-controller created
 ```
 
 ### Accessing Traefik WebUI
@@ -543,6 +548,11 @@ To spin up this demo simply execute the following:
 
 ```bash
 kubectl apply -f deployments/nginx_deployment.yaml
+...
+namespace/demo created
+deployment.extensions/nginx-demo created
+service/nginx-demo created
+ingress.extensions/nginx-demo created
 ```
 
 To validate all is good:
@@ -643,6 +653,9 @@ kubectl delete -f deployments/dashboard-admin.yaml
 ## Cluster DNS and Service Discovery
 
 ### [CoreDNS](https://coredns.io)
+
+> NOTE: CoreDNS is now the default so this is only for historical references
+> and will likely be removed.
 
 You may wish to update the default `DNS` service to use `CoreDNS` to learn and/or
 whatever you want. The good news is that `CoreDNS` will eventually be the default
@@ -804,6 +817,10 @@ generated during provisioning if `glusterfs_volume_force_create: true`.
 
 ```bash
 kubectl apply -f deployments/glusterfs.yaml
+...
+endpoints/glusterfs-cluster created
+endpoints/glusterfs-cluster created
+service/glusterfs-cluster created
 ```
 
 ### Using GlusterFS In Kubernetes Pod
@@ -849,10 +866,10 @@ To deploy Heapster simply run the following:
 ```bash
 kubectl apply -f deployments/heapster.yaml
 ...
-clusterrolebinding "heapster" created
-serviceaccount "heapster" created
-deployment "heapster" created
-service "heapster" created
+clusterrolebinding.rbac.authorization.k8s.io/heapster created
+serviceaccount/heapster created
+deployment.extensions/heapster created
+service/heapster created
 ```
 
 ### InfluxDB/Grafana
@@ -869,11 +886,11 @@ Grafana.
 ```bash
 kubectl apply -f deployments/influx-grafana.yaml
 ...
-deployment "monitoring-grafana" created
-service "monitoring-grafana" created
-deployment "monitoring-influxdb" created
-service "monitoring-influxdb" created
-ingress "monitoring-grafana" created
+deployment.apps/monitoring-grafana created
+service/monitoring-grafana created
+deployment.apps/monitoring-influxdb created
+service/monitoring-influxdb created
+ingress.extensions/monitoring-grafana created
 ```
 
 After the deployment above has been successful you should be able to connect to
