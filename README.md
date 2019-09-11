@@ -1,7 +1,6 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
   - [Background](#background)
     - [Why?](#why)
@@ -534,7 +533,7 @@ using standard routing protocols.
 ##### Deploying MetalLB Using Kubectl
 
 ```bash
-kubectl apply -f deployments/metallb.yaml
+kubectl apply -f deployments/metallb/deploy.yaml
 ...
 namespace/metallb-system created
 podsecuritypolicy.policy/speaker created
@@ -579,7 +578,7 @@ You can deploy `Traefik` using one of the following methods.
 ##### Deploy Traefik Using Kubectl
 
 ```bash
-kubectl apply -f deployments/traefik.yaml
+kubectl apply -f deployments/traefik/deploy.yaml
 ...
 serviceaccount/traefik-ingress-controller created
 clusterrolebinding.rbac.authorization.k8s.io/traefik-ingress-controller created
@@ -928,11 +927,10 @@ available for consumption within those namespaces.
 ### Deploying GlusterFS In Kubernetes
 
 You must first deploy the Kubernetes `Endpoints` and `Service` defined in
-[deployments/glusterfs.yaml](deployments/glusterfs.yaml). This file is dynamically
-generated during provisioning if `glusterfs_volume_force_create: true`.
+[deployments/glusterfs/deploy.yaml](deployments/glusterfs/deploy.yaml). This file is dynamically generated during provisioning if `glusterfs_volume_force_create: true`.
 
 ```bash
-kubectl apply -f deployments/glusterfs.yaml
+kubectl apply -f deployments/glusterfs/deploy.yaml
 ...
 endpoints/glusterfs-cluster created
 endpoints/glusterfs-cluster created

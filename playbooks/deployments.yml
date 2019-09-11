@@ -27,5 +27,5 @@
     - name: Generating GlusterFS Deployment
       template:
         src: templates/glusterfs.yaml.j2
-        dest: ../deployments/glusterfs.yaml
+        dest: ../deployments/glusterfs/deploy.yaml
       when: rpi_k8s_use_glusterfs
