@@ -32,9 +32,18 @@
     - [Adding Static Route On macOS](#adding-static-route-on-macos)
     - [Deleting Static Route on macOS](#deleting-static-route-on-macos)
   - [Load Balancing And Exposing Services](#load-balancing-and-exposing-services)
-    - [Deploying Traefik](#deploying-traefik)
-    - [Accessing Traefik WebUI](#accessing-traefik-webui)
+    - [MetalLB](#metallb)
+      - [Deploying MetalLB](#deploying-metallb)
+        - [Deploying MetalLB Using Kubectl](#deploying-metallb-using-kubectl)
+        - [Configuring MetalLB](#configuring-metallb)
+    - [Traefik](#traefik)
+      - [Deploying Traefik](#deploying-traefik)
+        - [Deploy Traefik Using Kubectl](#deploy-traefik-using-kubectl)
+        - [Deploy Traefik Using Helm](#deploy-traefik-using-helm)
+      - [Accessing Traefik WebUI](#accessing-traefik-webui)
     - [Load Balanced NGINX Demo Deployment](#load-balanced-nginx-demo-deployment)
+      - [NGINX Load Balanced With MetalLB](#nginx-load-balanced-with-metallb)
+      - [NGINX Load Balanced With Traefik](#nginx-load-balanced-with-traefik)
   - [Kubernetes Dashboard](#kubernetes-dashboard)
     - [kubectl proxy](#kubectl-proxy)
     - [SSH Tunnel](#ssh-tunnel)
@@ -510,12 +519,59 @@ delete net 192.168.100.0: gateway 172.16.24.186
 
 ## Load Balancing And Exposing Services
 
+### MetalLB
+
+#### Deploying MetalLB
+
+MetalLB is a load-balancer implementation for bare metal Kubernetes clusters,
+using standard routing protocols.
+
+##### Deploying MetalLB Using Kubectl
+
+```bash
+kubectl apply -f deployments/metallb.yaml
+...
+namespace/metallb-system created
+podsecuritypolicy.policy/speaker created
+serviceaccount/controller created
+serviceaccount/speaker created
+clusterrole.rbac.authorization.k8s.io/metallb-system:controller created
+clusterrole.rbac.authorization.k8s.io/metallb-system:speaker created
+role.rbac.authorization.k8s.io/config-watcher created
+clusterrolebinding.rbac.authorization.k8s.io/metallb-system:controller created
+clusterrolebinding.rbac.authorization.k8s.io/metallb-system:speaker created
+rolebinding.rbac.authorization.k8s.io/config-watcher created
+daemonset.apps/speaker created
+deployment.apps/controller created
+```
+
+##### Configuring MetalLB
+
+MetalLB remains idle until configured. This is accomplished by creating and
+deploying a configmap into the same namespace (metallb-system) as the
+deployment. We will be using MetalLB layer 2 and configuring the address space
+to be within our isolated cluster subnet `192.168.100.0/24`.
+
+> NOTE: To access exposed services provided by MetalLB, you will need to ensure
+> that you have routed access into your isolated subnet.
+> [Reference](#adding-static-route-on-macos)
+
+```bash
+kubectl apply -f deployments/metallb/config.yaml
+...
+configmap/config created
+```
+
+### Traefik
+
+#### Deploying Traefik
+
 We have included [Traefik](traefik.io) as an available load balancer which can
 be deployed to expose cluster services.
 
-### Deploying Traefik
+You can deploy `Traefik` using one of the following methods.
 
-You can deploy `Traefik` by running the following:
+##### Deploy Traefik Using Kubectl
 
 ```bash
 kubectl apply -f deployments/traefik.yaml
@@ -526,28 +582,48 @@ configmap/traefik-cfg created
 deployment.apps/traefik-ingress-controller created
 ```
 
-### Accessing Traefik WebUI
+##### Deploy Traefik Using Helm
 
-You can access the Traefik WebUI by heading over to <http://wirelessIP:8080/dashboard/#/>
+```bash
+helm install stable/traefik --name traefik -values deployments/traefik/values.yaml --namespace kube-system
+```
+
+#### Accessing Traefik WebUI
+
+You can access the Traefik WebUI by heading over to <http://wirelessIP:8080/dashboard/>
 (replace `wirelessIP` with your actual IP of the wireless address on the first node).
 
 ![Traefik](images/2018/02/traefik.png)
 
 ### Load Balanced NGINX Demo Deployment
 
-We have an example NGINX deployment [deployments/nginx_deployment.yaml](deployments/nginx_deployment.yaml)
-that you can easily spin up for learning and testing. This deployment creates
-the `demo` Namespace, `nginx-demo` Deployment with `2` replicas using the `nginx`
-image, `nginx-demo` Service, `nginx-demo` Ingress, and attaches itself to the `Traefik`
-load balancer with the path `/demo` but strips the path prefix so that the default
-NGINX container(s) will return the default page as `/` rather than `/demo` because
-that would fail. You can then connect to the default web page by connecting to
-<http://wirelessIP/demo>.
+We have included an example NGINX deployment using either MetalLB or Traefik in
+which you can easily spin up for learning and testing. Both use the `demo` Namespace.
+
+#### NGINX Load Balanced With MetalLB
+
+You can deploy using `kubectl` by doing the following:
+
+```bash
+kubectl apply -f deployments/metallb/nginx-deployment.yaml
+```
+
+You may also deploy using `Terraform` by doing the following:
+
+```bash
+cd deployments/terraform
+terraform init
+terraform apply
+```
+
+#### NGINX Load Balanced With Traefik
+
+This deployment creates the `demo` Namespace, `nginx-demo` Deployment with `2` replicas using the `nginx` image, `nginx-demo` Service, `nginx-demo` Ingress, and attaches itself to the `Traefik` load balancer with the path `/demo` but strips the path prefix so that the default NGINX container(s) will return the default page as `/` rather than `/demo` because that would fail. You can then connect to the default web page by connecting to <http://wirelessIP/demo>.
 
 To spin up this demo simply execute the following:
 
 ```bash
-kubectl apply -f deployments/nginx_deployment.yaml
+kubectl apply -f deployments/traefik/nginx-deployment.yaml
 ...
 namespace/demo created
 deployment.extensions/nginx-demo created

@@ -1,0 +1,42 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-metallb-demo
+  namespace: demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-metallb-demo
+  template:
+    metadata:
+      labels:
+        app: nginx-metallb-demo
+    spec:
+      containers:
+        - name: nginx
+          image: mrlesmithjr/nginx-arm:alpine
+          ports:
+            - name: http
+              containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-metallb-demo
+  namespace: demo
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: nginx-metallb-demo
+  type: LoadBalancer
