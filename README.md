@@ -1,6 +1,7 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+
 - [ansible-rpi-k8s-cluster](#ansible-rpi-k8s-cluster)
   - [Background](#background)
     - [Why?](#why)
@@ -44,6 +45,10 @@
     - [Load Balanced NGINX Demo Deployment](#load-balanced-nginx-demo-deployment)
       - [NGINX Load Balanced With MetalLB](#nginx-load-balanced-with-metallb)
       - [NGINX Load Balanced With Traefik](#nginx-load-balanced-with-traefik)
+  - [Consul Cluster](#consul-cluster)
+    - [Consul Cluster Using Kubectl](#consul-cluster-using-kubectl)
+    - [Consul Cluster Using Terraform](#consul-cluster-using-terraform)
+      - [Validating Consul Members](#validating-consul-members)
   - [Kubernetes Dashboard](#kubernetes-dashboard)
     - [kubectl proxy](#kubectl-proxy)
     - [SSH Tunnel](#ssh-tunnel)
@@ -660,6 +665,41 @@ To tear down this demo simply execute the following:
 
 ```bash
 kubectl delete -f deployments/nginx_deployment.yaml
+```
+
+## Consul Cluster
+
+We have included a 3 node Consul cluster to spin up in the `default` namespace.
+[MetalLB](#metallb) is required for this deployment as we are exposing the Consul
+UI over port `8500`.
+
+To spin up this Consul cluster simply execute one of the following:
+
+### Consul Cluster Using Kubectl
+
+```bash
+kubectl apply -f deployments/consul/deploy.yaml
+...
+serviceaccount/consul created
+clusterrole.rbac.authorization.k8s.io/consul created
+clusterrolebinding.rbac.authorization.k8s.io/consul created
+statefulset.apps/consul created
+service/consul-ui created
+```
+
+### Consul Cluster Using Terraform
+
+> NOTE: Coming soon
+
+#### Validating Consul Members
+
+```bash
+kubectl exec consul-0 consul members
+...
+Node      Address         Status  Type    Build  Protocol  DC   Segment
+consul-0  10.36.0.3:8301  alive   server  1.6.0  2         dc1  <all>
+consul-1  10.42.0.1:8301  alive   server  1.6.0  2         dc1  <all>
+consul-2  10.35.0.2:8301  alive   server  1.6.0  2         dc1  <all>
 ```
 
 ## Kubernetes Dashboard

@@ -1,0 +1,116 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: consul
+  labels:
+    app: consul
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: consul
+  labels:
+    app: consul
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: consul
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: consul
+subjects:
+  - kind: ServiceAccount
+    name: consul
+    namespace: default
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: consul
+spec:
+  selector:
+    matchLabels:
+      app: consul
+      component: server
+  serviceName: consul
+  podManagementPolicy: "Parallel"
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: consul
+        component: server
+    spec:
+      serviceAccountName: consul
+      containers:
+        - image: mrlesmithjr/consul-arm:alpine
+          name: consul
+          command:
+            [
+              "consul",
+              "agent",
+              "-server",
+              "-ui",
+              "-bind",
+              "0.0.0.0",
+              "-client",
+              "0.0.0.0",
+              "-datacenter",
+              "dc1",
+              "-data-dir",
+              "/data/consul",
+              "-retry-join",
+              'provider=k8s label_selector="app=consul,component=server"',
+              "-bootstrap-expect",
+              "3",
+            ]
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - consul leave
+          ports:
+            - containerPort: 8500
+              name: ui-port
+            - containerPort: 8400
+              name: alt-port
+            - containerPort: 53
+              name: udp-port
+            - containerPort: 8443
+              name: https-port
+            - containerPort: 8080
+              name: http-port
+            - containerPort: 8301
+              name: serflan
+            - containerPort: 8302
+              name: serfwan
+            - containerPort: 8600
+              name: consuldns
+            - containerPort: 8300
+              name: server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consul-ui
+spec:
+  ports:
+    - name: http
+      protocol: "TCP"
+      port: 8500
+      targetPort: 8500
+  selector:
+    app: consul
+  type: LoadBalancer
