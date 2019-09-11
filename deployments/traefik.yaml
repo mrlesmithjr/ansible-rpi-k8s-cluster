@@ -14,9 +14,9 @@ roleRef:
   kind: ClusterRole
   name: cluster-admin
 subjects:
-- kind: ServiceAccount
-  name: traefik-ingress-controller
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: traefik-ingress-controller
+    namespace: kube-system
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -49,7 +49,7 @@ data:
       buckets=[0.1,0.3,1.2,5.0]
 ---
 kind: Deployment
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 metadata:
   name: traefik-ingress-controller
   namespace: kube-system
@@ -69,33 +69,33 @@ spec:
       nodeSelector:
         node-role.kubernetes.io/master: ""
       tolerations:
-      - key: "node-role.kubernetes.io/master"
-        effect: NoSchedule
+        - key: "node-role.kubernetes.io/master"
+          effect: NoSchedule
       serviceAccountName: traefik-ingress-controller
       containers:
-      - image: traefik
-        imagePullPolicy: IfNotPresent
-        name: traefik-ingress-controller
-        resources:
-          limits:
-            memory: 50Mi
-          requests:
-            cpu: 200m
-            memory: 20Mi
-        ports:
-        - name: http
-          containerPort: 80
-          # hostPort: 80
-        - name: https
-          containerPort: 443
-          # hostPort: 443
-        args:
-        - --configfile=/etc/traefik/traefik.toml
-        - --web=false
-        volumeMounts:
-        - name: traefik-cfg
-          mountPath: /etc/traefik/traefik.toml
+        - image: traefik
+          imagePullPolicy: IfNotPresent
+          name: traefik-ingress-controller
+          resources:
+            limits:
+              memory: 50Mi
+            requests:
+              cpu: 200m
+              memory: 20Mi
+          ports:
+            - name: http
+              containerPort: 80
+              # hostPort: 80
+            - name: https
+              containerPort: 443
+              # hostPort: 443
+          args:
+            - --configfile=/etc/traefik/traefik.toml
+            - --web=false
+          volumeMounts:
+            - name: traefik-cfg
+              mountPath: /etc/traefik/traefik.toml
       volumes:
-      - name: traefik-cfg
-        configMap:
-          name: traefik-cfg
+        - name: traefik-cfg
+          configMap:
+            name: traefik-cfg

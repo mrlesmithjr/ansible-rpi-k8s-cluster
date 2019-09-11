@@ -8,9 +8,9 @@ roleRef:
   kind: ClusterRole
   name: system:heapster
 subjects:
-- kind: ServiceAccount
-  name: heapster
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: heapster
+    namespace: kube-system
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -33,13 +33,13 @@ spec:
     spec:
       serviceAccountName: heapster
       containers:
-      - name: heapster
-        image: luxas/heapster:v1.4.0
-        imagePullPolicy: IfNotPresent
-        command:
-        - /heapster
-        - --source=kubernetes:https://kubernetes.default
-        - --sink=influxdb:http://monitoring-influxdb.kube-system.svc:8086
+        - name: heapster
+          image: luxas/heapster:v1.4.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - /heapster
+            - --source=kubernetes:https://kubernetes.default
+            - --sink=influxdb:http://monitoring-influxdb.kube-system.svc:8086
 ---
 apiVersion: v1
 kind: Service
@@ -48,13 +48,13 @@ metadata:
     task: monitoring
     # For use as a Cluster add-on (https://github.com/kubernetes/kubernetes/tree/master/cluster/addons)
     # If you are NOT using this as an addon, you should comment out this line.
-    kubernetes.io/cluster-service: 'true'
+    kubernetes.io/cluster-service: "true"
     kubernetes.io/name: Heapster
   name: heapster
   namespace: kube-system
 spec:
   ports:
-  - port: 80
-    targetPort: 8082
+    - port: 80
+      targetPort: 8082
   selector:
     k8s-app: heapster
