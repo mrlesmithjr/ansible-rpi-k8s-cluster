@@ -785,7 +785,7 @@ If you would like to replace the default `DNS` service installed during
 provisioning with `CoreDNS`, you can easily do so by doing the following:
 
 ```bash
-cd deployments
+cd deployments/archive
 ./deploy-coredns.sh | kubectl apply -f -
 kubectl delete --namespace=kube-system deployment kube-dns
 ```
@@ -965,7 +965,7 @@ spec:
 
 ## Monitoring
 
-We have included a few deployments to get some monitoring of your environment
+<!-- We have included a few deployments to get some monitoring of your environment
 going as well. These include [Heapster](https://github.com/kubernetes/heapster),
 [InfluxDB](https://www.influxdata.com/time-series-platform/influxdb/), and
 [Grafana](https://grafana.com/).
@@ -978,7 +978,7 @@ Kubernetes.
 To deploy Heapster simply run the following:
 
 ```bash
-kubectl apply -f deployments/heapster.yaml
+kubectl apply -f deployments/archive/heapster.yaml
 ...
 clusterrolebinding.rbac.authorization.k8s.io/heapster created
 serviceaccount/heapster created
@@ -998,7 +998,7 @@ Grafana.
 > to Grafana's WebUI.
 
 ```bash
-kubectl apply -f deployments/influx-grafana.yaml
+kubectl apply -f deployments/archive/influx-grafana.yaml
 ...
 deployment.apps/monitoring-grafana created
 service/monitoring-grafana created
@@ -1013,7 +1013,7 @@ the Grafana WebUI at `http://wirelessIP/grafana`.
 ![Grafana WebUI](images/2018/02/grafana-webui.png)
 
 And from the screenshot above you will notice that two dashboards
-(`cluster` and `pods`) are already pre-loaded during deployment.
+(`cluster` and `pods`) are already pre-loaded during deployment. -->
 
 ## Resetting The Kubernetes Cluster
 
