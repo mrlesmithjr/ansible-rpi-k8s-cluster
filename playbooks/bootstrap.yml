@@ -26,6 +26,12 @@
         - rpi_k8s_use_isc_dhcp
         - rpi_k8s_use_dnsmasq
 
+    - name: Removing legacy glusterfs apt repo
+      apt_repository:
+        repo: "deb [arch=arm64] http://download.gluster.org/pub/gluster/glusterfs/3.13/LATEST/Debian/{{ ansible_distribution_release|lower }}/arm64/apt {{ ansible_distribution_release|lower }} main"
+        state: absent
+      become: true
+
     - name: Updating APT Cache
       apt:
         # cache_valid_time: 3600
@@ -248,6 +254,12 @@
         user: "{{ rpi_username }}"
         state: present
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+      become: true
+
+    - name: Removing legacy glusterfs apt repo
+      apt_repository:
+        repo: "deb [arch=arm64] http://download.gluster.org/pub/gluster/glusterfs/3.13/LATEST/Debian/{{ ansible_distribution_release|lower }}/arm64/apt {{ ansible_distribution_release|lower }} main"
+        state: absent
       become: true
 
     # - command: ping -c 2 {{ hostvars[inventory_hostname]['ansible_host'] }}

@@ -34,3 +34,6 @@
 [submodule "roles/ansible-timezone"]
 	path = roles/ansible-timezone
 	url = https://github.com/mrlesmithjr/ansible-timezone.git
+[submodule "deployments/faas-netes"]
+	path = deployments/faas-netes
+	url = https://github.com/openfaas/faas-netes

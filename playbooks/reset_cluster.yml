@@ -2,7 +2,7 @@
 - hosts: rpi_k8s_slaves
   tasks:
     - name: Resetting K8s Slaves
-      command: kubeadm reset
+      command: kubeadm reset -f
       become: true
 
     - name: Ensuring All Default IPTABLES Chains Are Set To ACCEPT

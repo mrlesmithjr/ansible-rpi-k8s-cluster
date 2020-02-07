@@ -1,0 +1,115 @@
+# ---
+# apiVersion: storage.k8s.io/v1
+# kind: StorageClass
+# metadata:
+#   name: local
+# provisioner: kubernetes.io/no-provisioner
+# volumeBindingMode: WaitForFirstConsumer
+
+# ---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: pihole-local-etc-volume
+#   labels:
+#     directory: etc
+# spec:
+#   capacity:
+#     storage: 1Gi
+#   accessModes:
+#     - ReadWriteMany
+#   glusterfs:
+#     endpoints: glusterfs-cluster
+#     path: myVol1
+#     readOnly: false
+#   persistentVolumeReclaimPolicy: Delete
+
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: pihole-local-etc-claim
+# spec:
+#   # storageClassName: local
+#   accessModes:
+#     - ReadWriteMany
+#   resources:
+#     requests:
+#       storage: 1Gi
+#   selector:
+#     matchLabels:
+#       directory: etc
+
+# ---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: pihole-local-dnsmasq-volume
+#   labels:
+#     directory: dnsmasq.d
+# spec:
+#   capacity:
+#     storage: 1Gi
+#   accessModes:
+#     - ReadWriteMany
+#   glusterfs:
+#     endpoints: glusterfs-cluster
+#     path: myVol1
+#     readOnly: false
+#   persistentVolumeReclaimPolicy: Delete
+
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: pihole-local-dnsmasq-claim
+# spec:
+#   # storageClassName: local
+#   accessModes:
+#     - ReadWriteMany
+#   resources:
+#     requests:
+#       storage: 500Mi
+#   selector:
+#     matchLabels:
+#       directory: dnsmasq.d
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  labels:
+    app: pihole
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+        name: pihole
+    spec:
+      containers:
+        - name: pihole
+          image: pihole/pihole:latest
+          imagePullPolicy: Always
+          env:
+            - name: TZ
+              value: "America/New_York"
+            - name: WEBPASSWORD
+              value: "secret"
+      #     volumeMounts:
+      #       - name: pihole-local-etc-volume
+      #         mountPath: "/etc/pihole"
+      #       - name: pihole-local-dnsmasq-volume
+      #         mountPath: "/etc/dnsmasq.d"
+      # volumes:
+      #   - name: pihole-local-etc-volume
+      #     persistentVolumeClaim:
+      #       claimName: pihole-local-etc-claim
+      #   - name: pihole-local-dnsmasq-volume
+      #     persistentVolumeClaim:
+      #       claimName: pihole-local-dnsmasq-claim

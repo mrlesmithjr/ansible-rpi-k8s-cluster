@@ -18,6 +18,6 @@ glusterfs_debian_repo_info:
   key_url: "https://download.gluster.org/pub/gluster/glusterfs/{{ glusterfs_version }}/rsa.pub"
   repo: "deb [arch=arm64] http://download.gluster.org/pub/gluster/glusterfs/{{ glusterfs_version }}/LATEST/Debian/{{ ansible_distribution_release|lower }}/arm64/apt {{ ansible_distribution_release|lower }} main"
 
-glusterfs_version: 3.13
+glusterfs_version: 7
 
 glusterfs_volume_force_create: true

@@ -3,7 +3,7 @@ rpi_k8s_master
 rpi_k8s_slaves
 
 [rpi_k8s_master]
-rpi-k8s-1 ansible_host=192.168.1.102
+rpi-k8s-1 ansible_host=192.168.2.240
 
 [rpi_k8s_slaves]
 rpi-k8s-2 ansible_host=192.168.100.128
